@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="menu">
+
+	<typeAlias alias="menu" type="com.audit.entity.Menu" />
+	<typeAlias alias="user" type="com.audit.entity.User" />
+	<select id="getTopMenu" parameterClass="user" resultClass="menu">
+		SELECT
+		distinct(t9.id) as id,
+		t9.menuName as menuName,
+		t9.createTime as
+		createTime,
+		t9.state as
+		state,
+		t9.sort as sort
+		FROM dbo.sys_userinfo t1
+		LEFT JOIN
+		dbo.sys_roleuser t2
+		ON t1.id = t2.userid
+		LEFT JOIN
+		dbo.sys_rolemodulefun
+		t4
+		ON t2.roleid = t4.roleid
+		LEFT JOIN
+		dbo.sys_modulefun t5
+		ON
+		t4.modulefunid = t5.id
+		LEFT JOIN dbo.sys_function
+		t6
+		ON t6.id =
+		t5.functionid
+		LEFT JOIN dbo.sys_module t7
+		ON t7.id =
+		t5.moduleid
+		LEFT
+		JOIN dbo.sys_menu t8
+		ON t8.id = t7.menuId
+		LEFT JOIN
+		dbo.sys_menu t9
+		ON
+		t8.pid = t9.id
+		LEFT JOIN dbo.sys_role t10
+		ON t2.roleid = t10.id
+		WHERE
+		userAccount = #userAccount#
+		AND
+		t1.state = '0'
+		AND
+		t6.state = '0'
+		AND
+		t7.state = '0'
+		AND
+		t8.state = '0'
+		AND
+		t9.state = '0'
+		AND
+		t9.pid = '0' 
+		AND
+		t10.state = '0'
+		ORDER BY t9.sort ASC
+	</select>
+
+	<select id="getMenuByTopMenuID" parameterClass="com.audit.entity.MenuUserInfoInput"
+		resultClass="menu">
+		SELECT
+		distinct(t1.id) as id,
+		t1.menuName as menuName,
+		t1.sort as sort,
+		t1.state as state
+		FROM dbo.sys_menu t1
+		LEFT JOIN
+		dbo.sys_module t2
+		ON
+		t1.id = t2.menuId
+		LEFT JOIN dbo.sys_modulefun t3
+		ON
+		t3.moduleid = t2.id
+		LEFT
+		JOIN dbo.sys_rolemodulefun t4
+		ON
+		t4.modulefunid =
+		t3.id
+		LEFT JOIN
+		dbo.sys_roleuser t5
+		ON
+		t5.roleid = t4.roleid
+		LEFT JOIN
+		dbo.sys_userinfo
+		t6
+		ON
+		t6.id = t5.userid
+		WHERE
+		t1.pid = #topMenuID#
+		AND
+		t6.userAccount =
+		#userAccount#
+		AND
+		t6.password = #password#
+	</select>
+
+	<select id="getModuleByTopMenuID" parameterClass="com.audit.entity.MenuUserInfoInput"
+		resultClass="menu">
+		SELECT
+		t1.id as id,
+		t1.menuId as pid,
+		t1.modulename as
+		menuName,
+		t1.state as state,
+		t1.url as url
+		FROM
+		dbo.sys_module t1
+		LEFT JOIN
+		dbo.sys_modulefun t2
+		ON
+		t1.id = t2.moduleid
+		LEFT JOIN dbo.sys_function t3
+		ON
+		t3.id = t2.functionid
+		LEFT JOIN dbo.sys_menu t4
+		ON
+		t4.id = t1.menuId
+		LEFT JOIN dbo.sys_rolemodulefun t5
+		ON
+		t5.modulefunid = t2.id
+		LEFT JOIN
+		dbo.sys_roleuser t6
+		ON
+		t5.roleid = t6.roleid
+		LEFT JOIN dbo.sys_userinfo
+		t7
+		ON
+		t7.id = t6.userid
+		WHERE
+		t7.userAccount = #userAccount#
+		AND
+		t7.password = #password#
+		AND
+		t4.pid = #topMenuID#
+    </select>
+
+	<select id="getAllTopMenuCount" resultClass="java.lang.Integer">
+		SELECT COUNT(*) FROM
+		dbo.sys_menu WHERE pid = '0'
+	</select>
+
+	<select id="getAllTopMenuByIndexCount" parameterClass="menu"
+		resultClass="menu">
+		<![CDATA[
+		SELECT TOP $pagesize$ t1.id,t1.menuName,t1.sort,t1.state,t1.createTime,t1.remark,t1.pid
+		FROM (select * from dbo.sys_menu where pid =
+		'0') t1
+		WHERE (id NOT IN(SELECT TOP ($pagesize$* $pageno$) id FROM
+				]]>
+		(select * from dbo.sys_menu where pid = '0') t2
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id asc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id asc
+	    </isEmpty>
+	</select>
+
+	<select id="daoHangMaxID" resultClass="java.lang.Integer">
+		Select max(SUBSTRING
+		(id,3,len(id)))from dbo.sys_menu where pid = '0'
+	</select>
+
+	<select id="subMenuMaxID" resultClass="java.lang.Integer">
+		Select max(SUBSTRING
+		(id,2,len(id)))from dbo.sys_menu where pid <![CDATA[<>]]>
+		'0' or pid is null
+	</select>
+
+	<insert id="addMenu" parameterClass="menu">
+		INSERT INTO dbo.sys_menu
+		(id
+		,menuName
+		,pid
+		,state
+		,createTime
+		,sort
+		,remark)
+		VALUES
+		(#id#
+		,#menuName#
+		,#pid#
+		,#state#
+		,GETDATE()
+		,#sort#
+		,#remark#)
+	</insert>
+
+	<update id="updateMenu" parameterClass="menu">
+		UPDATE dbo.sys_menu
+		SET
+		createTime = GETDATE()
+		    <isNotEmpty property="menuName">
+			,menuName = #menuName#
+			</isNotEmpty>
+			<isNotEmpty property="pid">
+			,pid = #pid#
+			</isNotEmpty>
+			,state = #state#
+			,sort = #sort#
+			,remark =#remark#
+		WHERE id = #id#
+	</update>
+	
+	<update id="destroyMenu" parameterClass="menu">
+		UPDATE dbo.sys_menu
+		SET
+		createTime = GETDATE()
+		,state = #state#
+		WHERE id = #id#
+	</update>
+
+	<delete id="deleteMenu" parameterClass="java.lang.String">
+		DELETE FROM dbo.sys_menu
+		WHERE id = #id#
+    </delete>
+
+	<!-- 查询菜单 -->
+	<select id="selectusermenu" parameterClass="com.audit.entity.ParameterMenu"
+		resultClass="menu">
+
+		select * from sys_menu where id in(
+
+		select menuid from
+		sys_module where id in(
+
+		select moduleid from sys_modulefun where id in
+		(
+		select modulefunid from sys_rolemodulefun where roleid in
+		(
+		select
+		roleid from sys_roleuser where userid=#userid#
+		)
+		)
+		)
+		and state=0
+		)
+		and
+		state=0
+		and pid=#menuid#
+    
+    </select>
+
+
+	<!-- 查询功能 -->
+	<select id="selectusermodule" parameterClass="com.audit.entity.ParameterMenu"
+		resultClass="com.audit.entity.Module">
+		select id,modulename,(url+'input.do') as
+		url,menuId,state,createtime,remark
+		from sys_module where id in(
+		select
+		moduleid from sys_modulefun where id in
+		(
+		select modulefunid from
+		sys_rolemodulefun where roleid in
+		(
+		select roleid from sys_roleuser
+		where userid=#userid#
+		)
+		)
+		)
+		and state=0
+		and menuId=#menuid#
+    </select>
+
+	<select id="getMenuById" parameterClass="java.lang.String"
+		resultClass="menu">
+		SELECT id,menuName,pid,state,createTime,sort,remark
+		FROM
+		dbo.sys_menu
+		WHERE id = #id#
+	</select>
+
+	<select id="getAllSubMenuCountByTopMenuId" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT COUNT(*) FROM
+		dbo.sys_menu WHERE pid <![CDATA[=]]>#pid#
+	</select>
+
+	<select id="getAllSubMenuByIndexCount" parameterClass="menu"
+		resultClass="menu">
+    <![CDATA[
+		SELECT TOP $pagesize$ t1.id,t1.menuName,t1.sort,t1.state,t1.createTime,t1.remark,t1.pid
+		FROM (select * from dbo.sys_menu where pid <> '0') t1
+		WHERE (id NOT IN(SELECT TOP ($pagesize$* $pageno$) id FROM
+				(select * from dbo.sys_menu where pid <> '0') t2
+				]]>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id asc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id asc
+	    </isEmpty>
+	</select>
+
+	<select id="getAllTopMenu" resultClass="menu">
+		SELECT
+		t1.id,
+		t1.menuName,
+		t1.sort,
+		t1.state,
+		t1.createTime,
+		t1.remark,
+		t1.pid
+		FROM
+		dbo.sys_menu t1
+		WHERE pid = '0'
+	</select>
+
+	<select id="checkNameIsExist" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT count(1)
+		FROM
+		dbo.sys_menu t1
+		WHERE pid = '0'
+		AND menuName =#name#
+	</select>
+
+	<select id="checkFunctionImpower" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT t2.functionid FROM dbo.sys_module t1
+		Left join dbo.sys_modulefun t2
+		ON t1.id = t2.moduleid
+		Where t1.id = #mouleid#
+	</select>
+	
+</sqlMap>
+

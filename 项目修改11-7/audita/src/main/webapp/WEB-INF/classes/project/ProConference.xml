@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ProConferencexml">
+     <typeAlias alias="ResultClassProConference" type="com.audit.entity.project.ResultClassProConference"/>
+     <typeAlias alias="ProConferenceinfo" type="com.audit.entity.project.ProConferenceinfo"/>
+     
+     <!-- 分页查询政府交办下面项目信息 -->
+      <select id="selectgovernmentAssignproinfo" parameterClass="ResultClassProConference" resultClass="ResultClassProConference">   
+        select d.id as datapreId,d.datapreno,d.projectNo,d.constructId as shigongunit,d.sentAmount as sendMoney,  d.projectName as projectName,d.proownerid,s.id as arrangeId,s.intermediaryId
+           ,s.mainAuditId,d.datapretime,s.isMySelfState,s.intermediarySendTime,s.intermediaryAuditTime from pro_datapreinfo d left join  
+       pro_singleProjectArrange s 
+        on d.id=s.datapreId 
+        left join  pro_assignRelate sr
+     on d.id=sr.projectId   
+        where 1=1 
+        and sr.governmentAssignId=#governmentAssignId#
+             <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+      </select>
+      
+      <!-- 查询没有交办批次的项目信息 -->
+      <select id="selectnogovernmentAssignproinfo" parameterClass="ResultClassProConference" resultClass="ResultClassProConference">   
+          select d.id as datapreId,d.datapreno,d.projectNo,d.constructId as shigongunit,d.sentAmount as sendMoney,  d.projectName as projectName,d.proownerid,s.id as arrangeId,s.intermediaryId
+           ,s.mainAuditId,d.datapretime,s.isMySelfState,s.intermediarySendTime,s.intermediaryAuditTime from pro_datapreinfo d left join  
+       pro_singleProjectArrange s 
+        on d.id=s.datapreId 
+        left join  pro_assignRelate sr
+     on d.id=sr.projectId   
+        where 1=1  and
+        sr.governmentAssignId is null
+        order by sr.governmentAssignId
+      </select>
+      
+      <!-- 查询交办下面项目数量 -->
+         <select id="selectgovernmentAssignprocount" parameterClass="ResultClassProConference" resultClass="java.lang.Integer">   
+		   select count(1) from
+		   (
+		     select d.id as datapreId,d.datapreno,d.projectNo,d.constructId as shigongunit,d.sentAmount as sendMoney,  d.projectName as projectName,d.proownerid,s.id as arrangeId,s.intermediaryId
+           ,s.mainAuditId from pro_datapreinfo d left join  
+       pro_singleProjectArrange s 
+        on d.id=s.datapreId 
+        left join  pro_assignRelate sr
+     on d.id=sr.projectId   
+        where 1=1 
+        and sr.governmentAssignId=#governmentAssignId#
+            ) t where 1=1
+	  </select>  
+     
+    <!-- 分页查询审计项目数据 -->
+	  <select id="selectdatapreconferencepage" parameterClass="ResultClassProConference" resultClass="ResultClassProConference">   
+	  select d.id as datapreId,d.projectName as projectName,d.proownerid,s.id as arrangeId,s.intermediaryId,s.mainAuditId from pro_datapreinfo d left join  
+       pro_singleProjectArrange s 
+        on d.id=s.datapreId where 1=1
+	    <dynamic prepend="and">
+             <isNotEmpty property="projectName">
+                       projectName like '%$projectName$%'
+             </isNotEmpty>
+         </dynamic>
+           <dynamic prepend="and">
+             <isNotEmpty property="proownerid">
+                       proownerid =#proownerid#
+             </isNotEmpty>
+         </dynamic>
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  
+	  <!-- 查询审计项目记录条数 -->
+	   <select id="selectdatapreconferencecount" parameterClass="ResultClassProConference" resultClass="java.lang.Integer">   
+		   select count(1) from
+		   (
+		    select d.id as datapreId,d.projectName as projectName,d.proownerid,s.id as arrangeId,s.intermediaryId,s.mainAuditId from pro_datapreinfo d left join  
+            pro_singleProjectArrange s 
+            on d.id=s.datapreId
+            ) t where 1=1
+		  <dynamic prepend="and">
+             <isNotEmpty property="projectName">
+                       projectName like '%$projectName$%'
+             </isNotEmpty>
+         </dynamic>
+           <dynamic prepend="and">
+             <isNotEmpty property="proownerid">
+                       proownerid =#proownerid#
+             </isNotEmpty>
+         </dynamic>
+	  </select>  
+	  
+	  <!-- 根据安排id查询政府雇员 -->
+	  <select id="selectbyanrrgebyemp" parameterClass="java.lang.String" resultClass="com.audit.entity.User">
+	     select id,username from sys_userinfo where id in( select governmentEmployeeId from  pro_employeeArrangeRelate where projectArrangeId=#arrangeId#)
+	  </select>
+	  
+	  
+	  <!-- 查询打包安排 -->
+	  <select id="selectbydatapreIdpackdata" parameterClass="java.lang.String" resultClass="ResultClassProConference">
+	    select pa.id as arrangeId,pa.intermediaryId,pa.mainAuditId,pa.isMySelfState,pa.intermediarySendTime,pa.intermediaryAuditTime from 
+			pro_packProjectRelate pr inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			where pr.projectId=#projectId#
+	  </select>
+	  
+	  
+	  
+	  
+	  <!-- 分页查询会议记录 -->
+	  <select id="selectconferencepage"  parameterClass="ProConferenceinfo" resultClass="ProConferenceinfo">
+	    select id,datapreId,conferencetime,conferenceaddress,conferenunit,conferenpeople,conferentitle,mainpeople,conferencontent from pro_conferenceinfo where datapreId=#datapreId#
+	     <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select>
+	  
+	   <select id="selectconferencecount"  parameterClass="java.lang.String" resultClass="java.lang.Integer">
+	     select count(1) from pro_conferenceinfo where datapreId=#datapreId#
+	  </select>
+	  
+	  
+	  
+		  <!-- 查询会议对象 -->
+		   <select id="selectbyconferenceId" parameterClass="java.lang.String" resultClass="ProConferenceinfo">   
+		       select id,datapreId,conferencetime,conferenceaddress,conferenunit,conferenpeople,conferentitle,mainpeople,conferencontent from  pro_conferenceinfo where id=#id#
+		  </select> 
+		  
+		  <!-- 增加会议对象 -->
+		  <insert id="addconferenceinfo" parameterClass="ProConferenceinfo">
+		     insert into pro_conferenceinfo
+		     (id,datapreId,conferencetime,conferenceaddress,conferenunit,conferenpeople,conferentitle,mainpeople,conferencontent)
+		     values
+		     (#id#,#datapreId#,#conferencetime#,#conferenceaddress#,#conferenunit#,#conferenpeople#,#conferentitle#,#mainpeople#,#conferencontent#)
+		  </insert>
+		  
+		  <!-- 修改会议对象 -->
+	      <update id="updateconferenceinfo" parameterClass="ProConferenceinfo">
+	         update pro_conferenceinfo set
+	         datapreId=#datapreId#,
+	         conferencetime=#conferencetime#,
+	         conferenceaddress=#conferenceaddress#,
+	         conferenunit=#conferenunit#,
+	         conferenpeople=#conferenpeople#,
+	         conferentitle=#conferentitle#,
+	         mainpeople=#mainpeople#,
+	         conferencontent=#conferencontent#
+	         where id=#id#
+	      </update>
+	      <!-- 删除会议对象 -->   
+	       <delete id="delconference"  parameterClass="java.lang.String">
+		          delete from pro_conferenceinfo where id=#id#
+		  </delete>
+	   
+</sqlMap>
+

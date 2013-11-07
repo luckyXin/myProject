@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="DepartmentObject">
+
+   <typeAlias alias="dept" type="com.audit.entity.Department"/>
+      <!-- 查询部门数据 -->
+	  <select  id="selectdeptbypid" parameterClass="java.lang.String"  resultClass="dept">
+	       select id,deptname,pid,depttype,remark from sys_department where pid=#id#
+	  </select>
+	  
+	  <!-- 分页查询部门数据 -->
+	  <select id="selectAllDeptpage" parameterClass="dept" resultClass="dept">   
+	     select * from sys_department where 1=1 
+	     <dynamic prepend="and">
+             <isNotEmpty property="id">
+                      (id=#id# or pid=#id#)
+             </isNotEmpty>
+         </dynamic>
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  <!-- 查询机构总的记录条数 -->
+	   <select id="selectdeptAllcount" parameterClass="dept" resultClass="java.lang.Integer">   
+		  select count(*) from sys_department where 1=1 
+		   <dynamic prepend="and">
+             <isNotEmpty property="id">
+                      (id=#id# or pid=#id#)
+             </isNotEmpty>
+         </dynamic>
+	  </select>  
+	  
+	   <!-- 查询部门对象 -->
+	   <select id="selectdeptobject" parameterClass="java.lang.String"  resultClass="dept">   
+	         select id,deptname,pid,depttype,remark from sys_department where id=#id#
+	  </select> 
+	  
+	   <!-- 查询id最大值 -->
+	   <select id="selectdeptmaxid" resultClass="java.lang.Integer">   
+	  <![CDATA[   
+	  select max(SUBSTRING (id,2,len(id))) from  sys_department
+	  ]]>   
+	  </select> 
+	  <!-- 增加机构 -->
+	  <insert id="adddept"  parameterClass="dept">
+            insert into sys_department(id,deptname,pid,depttype,remark) 
+           values
+           (#id#,#deptname#,#pid#,#depttype#,#remark#)	
+	  </insert>
+	  
+	  <!-- 修改机构 -->
+	   <update id="updatedept"  parameterClass="dept">
+           update sys_department set
+           deptname=#deptname#,	
+           pid=#pid#,
+           depttype=#depttype#,
+           remark=#remark#
+           where id=#id#  
+	 </update>
+	 
+	 <!-- 删除机构 -->
+	 <delete id="deletedept" parameterClass="java.lang.String">
+	     delete from sys_department where id=#id#
+	 </delete>
+	 
+	 <!-- 查询用户关联的机构信息 -->
+	 <select id="finduserdept" parameterClass="java.lang.String" resultClass="com.audit.entity.EditUser">
+	     select id from sys_userinfo where deptid=#id#
+	 
+	 </select>
+	 <!-- 修改用户关联的机构信息 -->
+	 <update id="updateuserdept"  parameterClass="java.lang.String">
+	      update sys_userinfo set deptid='' where id=#id#
+	 
+	 </update>
+</sqlMap>
+

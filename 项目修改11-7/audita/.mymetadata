@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="audita"
+  id="myeclipse.1368872502781"
+  context-root="/audita"
+  j2ee-spec="6.0"
+  archive="audita.war">
+  <attributes>
+    <attribute name="webrootdir" value="/src/main/webapp" />
+  </attributes>
+</project-module>
+

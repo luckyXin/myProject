@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="datajoinlistxml">
+
+   <typeAlias alias="DataJoinList" type="com.audit.entity.project.DataJoinList"/>
+    
+    <!-- 按资料预审id查询 -->
+    <select id="selectdatajoinlistbyid" parameterClass="java.lang.String" resultClass="DataJoinList">   
+	       select * from  pro_datajoinlist where datapreId=#datapreId#
+	</select> 
+	<!-- 查询条数 -->
+	<select id="selectdatajoincount" parameterClass="java.lang.String" resultClass="java.lang.Integer">  
+	   select count(*) from pro_datajoinlist where datapreId=#datapreId#
+	</select>
+	
+	<!-- 增加资料交接 -->  
+	<insert id="adddatajoinlist"  parameterClass="DataJoinList">
+           insert into pro_datajoinlist
+           (datapreId,auditapply,projectlixiangfile,projectgaisuanfile,projectconstructfile,projianlifile,proconstructtuzi,profinishtuzi,proinvitefile,procomparisionfile,designchangetuzi,constructgroupdesign,hideprolog,visadata,dizilook,profinishsettlement,ratemeasurementtable,stuffzmfile,feescertificate,probiangenvisaconfirm,advanceforpro,proquality,prostartend,quantities) 
+           values
+           (#datapreId#,#auditapply#,#projectlixiangfile#,#projectgaisuanfile#,#projectconstructfile#,#projianlifile#,#proconstructtuzi#,#profinishtuzi#,#proinvitefile#,#procomparisionfile#,#designchangetuzi#,#constructgroupdesign#,#hideprolog#,#visadata#,#dizilook#,#profinishsettlement#,#ratemeasurementtable#,#stuffzmfile#,#feescertificate#,#probiangenvisaconfirm#,#advanceforpro#,#proquality#,#prostartend#,#quantities#)
+	</insert>  
+	<update id="updatedatajoinlist" parameterClass="DataJoinList">
+	   update pro_datajoinlist  set
+	   auditapply=#auditapply#,
+	   projectlixiangfile=#projectlixiangfile#,
+	   projectgaisuanfile=#projectgaisuanfile#,
+	   projectconstructfile=#projectconstructfile#,
+	   projianlifile=#projianlifile#,
+	   proconstructtuzi=#proconstructtuzi#,
+	   profinishtuzi=#profinishtuzi#,
+	   proinvitefile=#proinvitefile#,
+	   procomparisionfile=#procomparisionfile#,
+	   designchangetuzi=#designchangetuzi#,
+	   constructgroupdesign=#constructgroupdesign#,
+	   hideprolog=#hideprolog#,
+	   visadata=#visadata#,
+	   dizilook=#dizilook#,
+	   profinishsettlement=#profinishsettlement#,
+	   ratemeasurementtable=#ratemeasurementtable#,
+	   stuffzmfile=#stuffzmfile#,
+	   feescertificate=#feescertificate#,
+	   probiangenvisaconfirm=#probiangenvisaconfirm#,
+	   advanceforpro=#advanceforpro#,
+	   proquality=#proquality#,
+	   prostartend=#prostartend#,
+	   quantities=#quantities#
+	   where datapreId=#datapreId#
+	</update>
+</sqlMap>
+

@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="flow">
+
+	<insert id="insertFlow" parameterClass="com.audit.entity.Flow">
+		INSERT INTO
+		dbo.sys_flowInfo
+		(id
+		,projectDateId
+		,craeteTime
+		,craetePeople
+		,state)
+		VALUES
+		(
+		#id#
+		,#projectDateId#
+		,GETDATE()
+		,#craetePeople#
+		,'0')
+	</insert>
+
+	<insert id="insertFlowState" parameterClass="com.audit.entity.FlowState">
+		INSERT INTO
+		dbo.sys_flowStateInfo
+		(id
+		,flowId
+		,stateId)
+		VALUES
+		(#id#
+		,#flowId#
+		,#stateId#)
+	</insert>
+
+	<insert id="insertFlowStateUserAccount" parameterClass="com.audit.entity.FlowStateUserAccount">
+		INSERT
+		INTO dbo.sys_flowStateUserInfo
+		(id
+		,flowStateId
+		,userAccount)
+		VALUES
+		(#id#
+		,#flowStateId#
+		,#userAccount#)
+	</insert>
+
+	<select id="findFlowByProjectDateId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT
+		id
+		FROM dbo.sys_flowInfo
+		Where state = '0' AND
+		projectDateId = #projectDateId#
+	</select>
+
+	<delete id="deleteFlowState" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.sys_flowStateInfo WHERE flowId = #flowId#
+	</delete>
+
+	<select id="getFlowStateId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT id FROM sys_auditStateInfo WHERE value=#value#
+	</select>
+
+	<select id="checkExistFlowStateId" parameterClass="com.audit.entity.FlowState"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM sys_flowStateInfo WHERE flowId =
+		#flowId# AND stateId =
+		#stateId#
+	</select>
+
+	<select id="getBeforeFlowStateId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT
+		afterState FROM dbo.sys_flowRecord WHERE updateTime
+		= (Select
+		Max(updateTime) FROM dbo.sys_flowRecord WHERE flowId =
+		#flowId#) AND flowId =
+		#flowId#
+	</select>
+
+	<select id="getNowFlowStateId" parameterClass="java.lang.String">
+		SELECT
+		beforeState
+		FROM dbo.sys_flowRecord WHERE updateTime
+		= (Select
+		Max(updateTime) FROM
+		dbo.sys_flowRecord) AND flowId =
+		#flowId#
+	</select>
+
+	<select id="getNowFlowRecord" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.FlowRecord">
+		SELECT
+		id,flowId,userAccount,beforeState,afterState,updateTime,projectDateId,flowState,remark
+		FROM dbo.sys_flowRecord
+		WHERE updateTime
+		= (Select
+		Max(updateTime) FROM
+		dbo.sys_flowRecord)
+		AND flowId
+		=
+		#flowId#
+	</select>
+
+	<insert id="insertFlowRecord" parameterClass="com.audit.entity.FlowRecord">
+		INSERT INTO
+		dbo.sys_flowRecord
+		(id
+		,flowId
+		,userAccount
+		,beforeState
+		,afterState
+		,updateTime
+		,projectDateId
+		,flowState
+		,remark)
+		VALUES
+		(#id#
+		,#flowId#
+		,#userAccount#
+		,#beforeState#
+		,#afterState#
+		,GETDATE()
+		,#projectDateId#
+		,#flowState#
+		,#remark#)
+	</insert>
+
+	<update id="updateFlowInfo" parameterClass="com.audit.entity.Flow">
+		UPDATE
+		dbo.sys_flowInfo
+		SET
+		projectDateId = #projectDateId#
+		,craeteTime =
+		GETDATE()
+		WHERE id = #id#
+	</update>
+
+	<update id="updateFlowInfoStateOff" parameterClass="java.lang.String">
+		UPDATE
+		dbo.sys_flowInfo
+		SET
+		state = '1'
+		,craeteTime = GETDATE()
+		WHERE id = #id#
+	</update>
+
+	<update id="updateFlowInfoStateOn" parameterClass="java.lang.String">
+		UPDATE
+		dbo.sys_flowInfo
+		SET
+		state = '0'
+		,craeteTime = GETDATE()
+		WHERE id = #id#
+	</update>
+
+	<select id="getMaxUpdateTimeProject" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT
+		t1.id
+		FROM dbo.sys_flowInfo t1
+		Where projectDateId =
+		#projectDateId# AND t1.craeteTime =
+		(SELECT
+		MAX(t1.craeteTime)
+		FROM
+		dbo.sys_flowInfo t1
+		Where
+		projectDateId = #projectDateId#)
+	</select>
+
+	<select id="getUserAccountByFlowState" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT t3.userAccount FROM dbo.sys_auditStateRoleInfo t1
+		LEFT
+		JOIN dbo.sys_roleuser t2
+		ON t1.roleId = t2.roleid
+		LEFT JOIN
+		dbo.sys_userinfo t3
+		ON t2.userid = t3.id
+		WHERE t1.stateId =
+		#stateId#
+	</select>
+
+	<!-- 获取该数据当前所属的流程 -->
+	<select id="findFlowStateByProjectDateId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT id FROM dbo.sys_flowStateInfo WHERE flowId =
+		#flowId#
+	</select>
+
+	<!-- 获取该流程当前的状态 -->
+	<select id="getFlowStateIdByFlowId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT id FROM dbo.sys_flowStateInfo WHERE flowId =
+		#flowId#
+	</select>
+
+	<!-- 删除该状态下的用户 -->
+	<delete id="deleteFlowStateUserInfo" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.sys_flowStateUserInfo WHERE flowStateId = #flowStateId#
+	</delete>
+
+	<!-- 获取该用户未完成的所有项目 -->
+	<select id="getAllNoCompleteWork" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.work.MyNoCompleteWorkInfo">
+		SELECT
+		t0.projectDateId,SUBSTRING(CONVERT(varchar,Max(t1.updateTime),
+		120),0,12) as startTime FROM dbo.flowView_mywork t0
+		LEFT JOIN
+		dbo.sys_flowRecord t1
+		ON t0.flowId = t1.flowId
+		WHERE t0.userAccount =
+		#userAccount#
+		GROUP BY t0.projectDateId
+    </select>
+    
+    
+    <!-- 暂停项目流程 -->
+    <update id="stopworkflow" parameterClass="java.lang.String">
+       update sys_flowInfo set state='2' where projectDateId=#id#
+    </update>
+    
+     <!-- 启用项目流程 -->
+    <update id="startworkflow" parameterClass="java.lang.String">
+       update sys_flowInfo set state='0' where projectDateId=#id#
+    </update>
+    
+    
+    <!-- 增加项目暂停审计申请表 -->
+    <insert id="addprosupauditinfo" parameterClass="com.audit.entity.project.ProSuspendAuditInfo">
+       insert into pro_prosuspendauditinfo(id,projectName,childProjectName,datapreId,ownnerName,constructName,suspendRemark,operatorUser,createTime)
+       values
+       (#id#,#projectName#,#childProjectName#,#datapreId#,#ownnerName#,#constructName#,#suspendRemark#,#operatorUser#,#createTime#)
+    
+    </insert>
+</sqlMap>

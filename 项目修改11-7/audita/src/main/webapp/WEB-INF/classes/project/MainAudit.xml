@@ -1,0 +1,4289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="mainAudit">
+	<!-- 查询能够生成审计通知书的项目总数 -->
+	<select id="findAuditAdviceNoteProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT t2.id FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.ownerName
+		LEFT JOIN
+		dbo.sys_userinfo t4
+		ON
+		t1.mainAuditId = t4.id
+		WHERE
+		t4.userAccount =
+		#userAccount#
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON
+		t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+			</isNotEmpty>
+		) t
+	</select>
+	<!-- 查询资金支出 -->
+	<select id="getcapitalexpenditures" parameterClass="java.lang.String"
+	resultClass="com.audit.entity.project.Capitalexpenditures">
+		select * from pro_capitalexpenditures where mainAuditInfoid=#mainAuditInfoid#
+	</select>
+	<!-- 查询问题表 -->
+	<select id="getProblems" parameterClass="java.lang.String"
+	resultClass="com.audit.entity.project.Problems">
+		select * from pro_problems where mainAuditInfoid=#mainAuditInfoid#
+	</select>
+		<!-- 删除资金支出 -->
+	<delete id="deletcapitalexpenditures" parameterClass="java.lang.String">
+		DELETE FROM pro_capitalexpenditures
+		WHERE mainAuditInfoid=#mainAuditInfoid#
+	</delete>
+		<!-- 删除问题表 -->
+	<delete id="deleteproblems" parameterClass="java.lang.String">
+		DELETE FROM pro_problems
+		WHERE mainAuditInfoid=#mainAuditInfoid#
+	</delete>
+	
+	<!-- 查询能够生成审计通知书的项目 -->
+	<select id="findAuditAdviceNoteProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$
+		id,projectName,datapreTime,ownerName,constructUnit
+		FROM (
+		SELECT
+		t2.id,t2.projectName,SUBSTRING(CONVERT(varchar,
+		t2.datapretime,120),0,12)
+		as datapreTime,t3.ownerName,t2.constructId
+		as
+		constructUnit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE
+		t5.userAccount =
+		#userAccount#
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,
+		t3.datapretime,120),0,12)
+		as datapreTime,t4.ownerName,t3.constructId
+		as
+		constructUnit FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP ($pagesize$*($pageno$ - 1))
+		id
+		FROM (
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE
+		t5.userAccount =
+		#userAccount#
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		)t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询能够生成意见稿的项目总数 -->
+	<select id="findAuditIdeaNoteProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT t2.id FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.ownerName
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+			</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 查询能够生成意见稿的项目 -->
+	<select id="findAuditIdeaNoteProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$
+		id,projectName,datapreTime,ownerName,constructUnit
+		FROM (
+		SELECT
+		t2.id,t2.projectName,SUBSTRING(CONVERT(varchar,
+		t2.datapretime,120),0,12)
+		as datapreTime,t3.ownerName,t2.constructId
+		as
+		constructUnit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,
+		t3.datapretime,120),0,12)
+		as datapreTime,t4.ownerName,t3.constructId
+		as
+		constructUnit FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP ($pagesize$*($pageno$ - 1))
+		id
+		FROM (
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		)t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询主审没有审核的单项目总数 -->
+	<select id="findNoMainAuditSingleProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1) FROM
+		dbo.pro_singleProjectArrange t1
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		= t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+	    <isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+	    </isNotEmpty>
+	    <isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+       </isNotEmpty>
+       <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+        <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+	</select>
+
+	<!-- 查询主审没有审核的单项目信息 -->
+	<select id="findNoMainAuditSingleProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$
+		id,
+		projectName,
+		ownerName,
+		intermediary,
+		mainAuditName,
+		isUrgent,
+		timeLimit 
+		FROM
+		(
+		SELECT
+		t1.id,t3.projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName,t1.isUrgent,t1.timeLimit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		inner JOin dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		=
+		t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+       <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) t1.id as id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		inner
+		JOin dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+        </isNotEmpty>
+        <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询科长没有完成审批的打包项目总数 -->
+	<select id="findNoMainAuditPackProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count (distinct t1.id) FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN dbo.pro_packProjectRelate t7
+		ON t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+	</select>
+
+	<!-- 查询科长没有完成审批的打包项目信息 -->
+	<select id="findNoMainAuditPackProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM
+		(
+		SELECT
+		distinct t1.id,t1.packageName as
+		projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2 ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		) t
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) t1.id as id
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t7
+		ON t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid =
+		t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 生成主审没有审批的所有项目(不分单项目，打包项目) 总数 -->
+	<select id="findNoMainAuditAllProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(ID) FROM
+		(
+		SELECT
+		t1.id FROM
+		dbo.pro_singleProjectArrange t1
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		= t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+         <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT distinct t1.id FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t7
+		ON t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+         <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 生成主审没有审批的所有项目(不分单项目，打包项目) 信息 -->
+	<select id="findNoMainAuditAllProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName,isUrgent,timeLimit FROM (
+		SELECT
+		t1.id,t3.projectName,t4.ownerName,t5.intermediaryname as intermediary,
+		t6.username as mainAuditName,t1.isUrgent,t1.timeLimit FROM
+		dbo.pro_singleProjectArrange t1
+		inner
+		JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		= t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		distinct t1.id,t1.packageName as
+		projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName,t1.isUrgent,t1.timeLimit
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN dbo.pro_packProjectRelate t7
+		ON
+		t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid =
+		t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		)ta
+		WHERE ((id not in (SELECT top($pagesize$*($pageno$ - 1)) id FROM
+		(SELECT t1.id,t3.projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,
+		t6.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		inner
+		JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		distinct t1.id,t1.packageName as
+		projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN dbo.pro_packProjectRelate t7
+		ON
+		t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		and t2.state='0'
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+        <isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) ta
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="getDataPreBaseInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.DataPreBaseInfo">
+		SELECT
+		t1.id,
+		t1.projectNo,
+		t1.auditMoney,
+		t1.auditNoteRemark,
+		SUBSTRING(CONVERT(varchar,t1.projectTime,120),0,12) as projectTime,
+		t1.projectName,
+		t2.ownerName as proOwnerName,
+		t1.proownerlink as
+		proOwnerLink,
+		t1.proownertelphone as proOwnerTelphone,
+		t1.constructId
+		as
+		constructName,
+		t1.constructlink as constructLink,
+		t1.constructtelphone
+		as constructTelphone,
+		t4.dictionaryname as
+		auditType,
+		t1.sentAmount ,
+		SUBSTRING(CONVERT(varchar,t1.datapretime,120),0,12) as datapreTime,
+		t1.isExpedited,
+		t1.datapreOperate as dataPreOperate,
+		t1.datapreopinion
+		as dataPreOpinion
+		FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t2
+		ON t1.proownerid = t2.id
+		LEFT JOIN
+		dbo.sys_dictionary t4
+		ON t1.audittype = t4.id
+		WHERE t1.id = #id#
+	</select>
+
+	<update id="updatePreBaseInfo" parameterClass="com.audit.entity.project.DataPreBaseInfo">
+		UPDATE
+		dbo.pro_datapreinfo
+		SET
+		workloadTime = #workloadTime#
+		,prospectTime =
+		#prospectTime#,
+		auditNoteRemark
+		=#auditNoteRemark#
+		WHERE id = #id#
+	</update>
+
+	<select id="getProjectMainAudit" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT t3.username FROM dbo.pro_datapreinfo t1
+		LEFT
+		JOIN (
+		SELECT t3.datapreId as id,t3.mainAuditId FROM
+		dbo.pro_singleProjectArrange
+		t3
+		union
+		SELECT t2.projectId as
+		id,t4.mainAuditId FROM dbo.pro_packProjectArrange t4
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t4.id = t2.projectPackId
+		) t2
+		ON t1.id =
+		t2.id
+		LEFT JOIN dbo.sys_userinfo t3
+		ON t3.id = t2.mainAuditId
+		WHERE t1.id
+		= #id#
+	</select>
+
+	<select id="getMainAuditInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.MainAuditInfo">
+		SELECT
+		id
+		,projectId
+		,auditAllMoney
+		,reduceMoney
+		,mainAuditPeople
+		,auditReportTime
+		,auditReportCode
+		,auditReportFile
+		,auditReportRemark
+		,auditInvestAllMoney
+		,auditContentAndScale
+		,noNormMoney
+		,otherNoNormMoney
+		,remark
+		FROM dbo.pro_mainAuditInfo
+		WHERE
+		id
+		= #id#
+	</select>
+
+	<update id="updateMainAuditStateByArrangeId" parameterClass="java.lang.String">
+		UPDATE dbo.pro_mainAuditInfo
+		SET
+		submitState = '1'
+		WHERE
+		arrangeId =
+		#arrangeId#
+	</update>
+
+	<insert id="insertMainAuditInfo" parameterClass="com.audit.entity.project.MainAuditInfo">
+		INSERT INTO
+		dbo.pro_mainAuditInfo
+		(id
+		,projectId
+		,reduceMoney
+		,mainAuditPeople
+		,auditReportTime
+		,auditReportCode
+		,auditReportFile
+		,auditReportRemark
+		,auditInvestAllMoney
+		,auditContentAndScale
+		,noNormMoney
+		,otherNoNormMoney
+		,remark
+		,arrangeId
+		,otherNoNormRemark
+		,submitState
+		,noNormProblem
+		,noNormProblemRemark
+		,auditstate
+		,projectDirectMoney
+		,totalInvestmentBudget
+		,designCompany
+		,projectStartTime
+		,projectEndTime
+		,prospectCompany
+		,projectManageCompany
+		,supervisorCompany
+		,buildMoney
+		,alreadyMoney
+		,progressPayment
+		,designMoney
+		,prospectMoney
+		,theTenderFee
+		,actualCompeleteMoney
+		,beyondMoney
+		,areaMoney
+		,cityMoney
+		,selfRaisedMoney
+		,bankMoney
+		,otherInputMoney
+		,projectConsultMoney
+		,eiaMoney
+		,clearMoney
+		,projectManageMoney
+		,auditMoney
+		,otherOutMoney
+		,dayCount
+		,money
+		,supervisorMoney
+		,sentAuditMone
+		,maincontent
+		,indirectcosts)
+		VALUES
+		(
+		#id#
+		,#projectId#
+		,#auditReduceAllMoney#
+		,#mainAuditPeople#
+		,#auditReportTime#
+		,#auditReportCode#
+		,#auditReportFile#
+		,#auditReportRemark#
+		,#auditInvestAllMoney#
+		,#auditContentAndScale#
+		,#noNormMoney#
+		,#otherNoNormMoney#
+		,#remark#
+		,#arrangeId#
+		,#otherNoNormProblem#
+		,#submitState#
+		,#noNormProblem#
+		,#problemRemark#
+		,'1'
+		,#projectDirectMoney#
+		,#totalInvestmentBudget#
+		,#designCompany#
+		,#projectStartTime#
+		,#projectEndTime#
+		,#prospectCompany#
+		,#projectManageCompany#
+		,#supervisorCompany#
+		,#buildMoney#
+		,#alreadyMoney#
+		,#progressPayment#
+		,#designMoney#
+		,#prospectMoney#
+		,#theTenderFee#
+		,#actualCompeleteMoney#
+		,#beyondMoney#
+		,#areaMoney#
+		,#cityMoney#
+		,#selfRaisedMoney#
+		,#bankMoney#
+		,#otherInputMoney#
+		,#projectConsultMoney#
+		,#eiaMoney#
+		,#clearMoney#
+		,#projectManageMoney#
+		,#auditMoney#
+		,#otherOutMoney#
+		,#dayCount#
+		,#money#
+		,#supervisorMoney#
+		,#sentAuditMone#
+		,#maincontent#
+		,#indirectcosts#)
+	</insert>
+	<insert id="instCapitalexpenditures" parameterClass="com.audit.entity.project.Capitalexpenditures">
+		INSERT INTO pro_capitalexpenditures
+		(id,unit,contractamount,capitalexpendituresUnit,stopAuditTime,amountpaid,mainAuditInfoid,ttvmoney)
+		 values 
+		(#id#,#unit#,#contractamount#,#capitalexpendituresUnit#,#stopAuditTime#,#amountpaid#,#mainAuditInfoid#,#ttvmoney#)
+		
+		
+	</insert>
+	<insert id="instproblems" parameterClass="com.audit.entity.project.Problems">
+		INSERT INTO pro_problems
+		(id,type,money,reason,day,mainAuditInfoid)
+		 values 
+		(#id#,#type#,#money#,#reason#,#day#,#mainAuditInfoid#)
+		
+		
+	</insert>
+	<update id="updateMainAuditInfo" parameterClass="com.audit.entity.project.MainAuditInfo">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		reduceMoney = #auditReduceAllMoney#
+		,auditReportTime = #auditReportTime#
+		,auditReportCode =
+		#auditReportCode#
+		,auditReportRemark = #auditReportRemark#
+		,auditInvestAllMoney = #auditInvestAllMoney#
+		,auditContentAndScale =
+		#auditContentAndScale#
+		,noNormMoney = #noNormMoney#
+		,otherNoNormMoney =
+		#otherNoNormMoney#
+		,remark = #remark#
+		,arrangeId = #arrangeId#
+		,otherNoNormRemark = #otherNoNormProblem#
+		,beyondMoney = #beyondMoney#
+		,actualCompeleteMoney =
+		#actualCompeleteMoney#
+		,theTenderFee = #theTenderFee#
+		,prospectMoney =
+		#prospectMoney#
+		,designMoney = #designMoney#
+		,progressPayment =
+		#progressPayment#
+		,alreadyMoney = #alreadyMoney#
+		,buildMoney =
+		#buildMoney#
+		,supervisorCompany = #supervisorCompany#
+		,projectManageCompany = #projectManageCompany#
+		,prospectCompany =
+		#prospectCompany#
+		,projectEndTime = #projectEndTime#
+		,projectStartTime =
+		#projectStartTime#
+		,designCompany = #designCompany#
+		,totalInvestmentBudget = #totalInvestmentBudget#
+		,projectDirectMoney =
+		#projectDirectMoney#
+		,money = #money#
+		,dayCount = #dayCount#
+		,otherOutMoney = #otherOutMoney#
+		,auditMoney = #auditMoney#
+		,projectManageMoney = #projectManageMoney#
+		,clearMoney = #clearMoney#
+		,eiaMoney = #eiaMoney#
+		,projectConsultMoney = #projectConsultMoney#
+		,otherInputMoney = #otherInputMoney#
+		,bankMoney = #bankMoney#
+		,selfRaisedMoney = #selfRaisedMoney#
+		,cityMoney = #cityMoney#
+		,areaMoney = #areaMoney#
+		,supervisorMoney = #supervisorMoney#
+		,sentAuditMone=#sentAuditMone#
+		,maincontent=#maincontent#
+		,indirectcosts=#indirectcosts#
+		WHERE id =
+		#id#
+	</update>
+
+	<select id="getPackProjectMainAuditInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.MainAuditInfo">
+		SELECT
+		sum(convert(decimal(18,2),t.reduceMoney)) as
+		auditReduceAllMoney,SUM(convert(decimal(18,2),t.auditInvestAllMoney))
+		as
+		auditInvestAllMoney ,
+		sum(convert(decimal(18,2),t.noNormMoney)) as
+		noNormMoney,
+		sum(convert(decimal(18,2),t.otherNoNormMoney)) as
+		otherNoNormMoney
+		FROM dbo.pro_mainAuditInfo t
+		group by t.arrangeId
+		having t.arrangeId = #id#
+	</select>
+	<select id="ystosps" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT id from pro_singleProjectArrange where datapreId=#id#
+	</select>
+
+	<select id="getSingleProjectMainAuditInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.MainAuditInfo">
+		SELECT
+		t.id,
+		t.auditContentAndScale,
+		t.auditInvestAllMoney,
+		t.auditReportCode,
+		t.auditReportRemark,
+		t.auditReportTime,
+		t.mainAuditPeople,
+		t.noNormMoney,
+		t.otherNoNormMoney,
+		t.projectId as
+		arrangeId,
+		t.reduceMoney as auditReduceAllMoney,
+		t.remark,
+		t.noNormProblem,
+		t.submitState,
+		t.projectDirectMoney,
+		t.totalInvestmentBudget,
+		t.designCompany,
+		t.projectStartTime,
+		t.projectEndTime,
+		t.prospectCompany,
+		t.projectManageCompany,
+		t.supervisorCompany,
+		t.buildMoney,
+		t.alreadyMoney,
+		t.progressPayment,
+		t.designMoney,
+		t.prospectMoney,
+		t.theTenderFee,
+		t.actualCompeleteMoney,
+		t.beyondMoney,
+		t.supervisorMoney,
+		t.money,
+		t.dayCount,
+		t.otherOutMoney,
+		t.auditMoney,
+		t.projectManageMoney,
+		t.clearMoney,
+		t.eiaMoney,
+		t.projectConsultMoney,
+		t.otherInputMoney,
+		t.bankMoney,
+		t.selfRaisedMoney,
+		t.cityMoney,
+		t.areaMoney,
+		t.sentAuditMone,
+		t.maincontent,
+		t.dayCount,
+		t.indirectcosts,
+		t.noNormProblemRemark as problemRemark,
+		t.otherNoNormRemark as
+		otherNoNormProblem
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE
+		t.arrangeId = #id#
+	</select>
+
+	<select id="getProjectPackArrangeId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT
+		t.projectPackId FROM dbo.pro_packProjectRelate t
+		WHERE t.projectId = #id#
+	</select>
+
+	<select id="findMainAuditSingleProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM dbo.pro_mainAuditInfo t
+		LEFT JOIN
+		(SELECT
+		t1.id,t2.projectName,t3.ownerName,t4.intermediaryname as
+		intermediary,t5.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t1.mainAuditId= t5.id
+		where 1=1
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+         <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE t.mainAuditPeople = #userAccount#
+		AND t1.id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<select id="findMainAuditSingleProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT
+		top $pagesize$
+		t1.id,
+		t1.intermediary,
+		t1.mainAuditName,
+		t1.ownerName,
+		t1.projectName,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM dbo.pro_mainAuditInfo t
+		LEFT JOIN
+		(SELECT
+		t1.id,
+		t2.projectName,
+		t3.ownerName,
+		t4.intermediaryname as intermediary,
+		t5.username as mainAuditName,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t1.mainAuditId= t5.id
+		where 1=1
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE (t1.id not in (SELECT
+		top($pagesize$*($pageno$ - 1)) t1.id
+		FROM
+		dbo.pro_mainAuditInfo t
+		LEFT
+		JOIN
+		(SELECT
+		t1.id,t2.projectName,t3.ownerName,t4.intermediaryname as
+		intermediary,t5.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t1.mainAuditId= t5.id
+		where 1=1 
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE t.mainAuditPeople = #userAccount#
+		AND t1.id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t1.id desc
+	    </isEmpty>
+		))
+		AND t.mainAuditPeople = #userAccount#
+		AND t1.id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="findMainAuditPackProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT
+		distinct
+		t1.id,t1.intermediary,t1.mainAuditName,t1.ownerName,t1.projectName
+		FROM dbo.pro_mainAuditInfo t
+		LEFT JOIN
+		(SELECT
+		t1.id,t1.packageName as
+		projectName,t2.ownerName, t3.intermediaryname
+		as
+		intermediary,t4.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN dbo.sys_userinfo t4
+		ON t4.id =
+		t1.mainAuditId
+		where 1=1 
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE t.mainAuditPeople = #userAccount#
+		AND
+		t1.id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+	</select>
+
+	<select id="findMainAuditPackProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top 10
+		id,intermediary,mainAuditName,ownerName,projectName
+		FROM (
+		SELECT
+		distinct(t1.id),t1.intermediary,t1.mainAuditName,t1.ownerName,t1.projectName
+		FROM dbo.pro_mainAuditInfo t
+		LEFT JOIN
+		(
+		SELECT
+		t1.id,t1.packageName as
+		projectName,t2.ownerName,
+		t3.intermediaryname
+		as
+		intermediary,t4.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN dbo.sys_userinfo t4
+		ON t4.id =
+		t1.mainAuditId
+		where 1=1
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		) t1
+		WHERE (t1.id not in (SELECT
+		top(0) t1.id
+		FROM
+		dbo.pro_mainAuditInfo t
+		LEFT
+		JOIN
+		(SELECT
+		t1.id,t1.packageName as
+		projectName,t2.ownerName,
+		t3.intermediaryname
+		as
+		intermediary,t4.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN dbo.sys_userinfo t4
+		ON t4.id =
+		t1.mainAuditId
+		where 1=1
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE t.mainAuditPeople = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t1.id desc
+	    </isEmpty>
+		))
+		AND
+		t1.id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t1.id desc
+	    </isEmpty>
+	</select>
+
+	<select id="findMainAuditProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT
+		distinct
+		t1.id,t1.intermediary,t1.mainAuditName,t1.ownerName,t1.projectName
+		FROM dbo.pro_mainAuditInfo t
+		LEFT JOIN
+		(
+		SELECT
+		t1.id,t2.projectName,t3.ownerName,t4.intermediaryname as
+		intermediary,t5.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t1.mainAuditId= t5.id
+		where 1=1
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+        </isNotEmpty>
+        <isNotEmpty property="endTime">
+        <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t1.id,t1.packageName as
+		projectName,t2.ownerName,
+		t3.intermediaryname
+		as
+		intermediary,t4.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN dbo.sys_userinfo t4
+		ON t4.id =
+		t1.mainAuditId
+		where 1=1
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE t1.projectName is not null
+		AND t.mainAuditPeople = #userAccount#
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+	</select>
+
+	<select id="findMainAuditProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$
+		t1.id,t1.intermediary,t1.mainAuditName,t1.ownerName,t1.projectName,isUrgent,timeLimit
+		FROM (
+		SELECT
+		distinct(t1.id),t1.intermediary,t1.mainAuditName,t1.ownerName,t1.projectName, t1.isUrgent, t1.timeLimit
+		FROM dbo.pro_mainAuditInfo t
+		LEFT JOIN
+		(
+		SELECT
+		t1.id,t2.projectName,t3.ownerName,t4.intermediaryname as
+		intermediary,t5.username as mainAuditName, t1.isUrgent, t1.timeLimit FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t1.mainAuditId= t5.id
+		where t2.projectName is not null
+		<isNotEmpty property="beginTime">
+            AND  t1.projectTime >= #beginTime#
+        </isNotEmpty>
+        <isNotEmpty property="endTime">
+        <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t1.id,t1.packageName as
+		projectName,t2.ownerName,
+		t3.intermediaryname
+		as
+		intermediary,t4.username as mainAuditName, t1.isUrgent, t1.timeLimit FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN dbo.sys_userinfo t4
+		ON t4.id =
+		t1.mainAuditId
+		where t1.packageName is not null
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+        </isNotEmpty>
+        <isNotEmpty property="endTime">
+        <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		AND t.mainAuditPeople = #userAccount#
+		) t1
+		WHERE (t1.id not in (SELECT
+		top($pagesize$*($pageno$ - 1)) t1.id
+		FROM
+		dbo.pro_mainAuditInfo t
+		LEFT
+		JOIN
+		(
+		SELECT
+		t1.id,t2.projectName,t3.ownerName,t4.intermediaryname as
+		intermediary,t5.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t1.mainAuditId= t5.id
+		where t2.projectName is not null
+		<isNotEmpty property="beginTime">
+                 AND  t1.projectTime >= #beginTime#
+        </isNotEmpty>
+        <isNotEmpty property="endTime">
+        <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t1.id,t1.packageName as projectName,t2.ownerName,
+		t3.intermediaryname
+		as intermediary,t4.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN dbo.sys_userinfo t4
+		ON t4.id =
+		t1.mainAuditId
+		where 1=1
+		<isNotEmpty property="beginTime">
+             AND  t1.projectTime >= #beginTime#
+        </isNotEmpty>
+        <isNotEmpty property="endTime">
+        <![CDATA[ 
+                 AND  t1.projectTime <= #endTime#
+           ]]> 
+        </isNotEmpty>
+        <isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t1
+		ON
+		t.arrangeId = t1.id
+		WHERE t1.projectName is not null
+		AND t.mainAuditPeople = #userAccount#
+		AND t1.id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t1.id desc
+	    </isEmpty>
+		))
+		AND id is not null
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+	<select id="getProjectBaseInfoByProjectId" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT
+		t2.id,
+		t2.projectName,
+		t2.sentAmount,
+		t3.intermediaryAuditTime,
+		t3.intermediarySendTime,
+		t4.username
+		as
+		mainAuditName,
+		t3.projectTime
+		FROM dbo.pro_packProjectRelate t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.projectId = t2.id
+		LEFT JOIN
+		dbo.pro_packProjectArrange t3
+		ON t3.id =
+		t1.projectPackId
+		LEFT JOIN
+		dbo.sys_userinfo t4
+		ON t3.mainAuditId = t4.id
+		WHERE t2.id = #id#
+	</select>
+
+	<select id="getIntermediaryAuditByProjectId" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProIntermediaryAudit">
+		SELECT
+		id
+		,auditmoney
+		,cutmoney
+		,auditoktime as auditTime
+		,deferday
+		,overday
+		,remark
+		,isconfirm
+		,userAccount
+		,(
+		SELECT
+		t2.intermediaryname FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.sys_intermediaryagency t2
+		ON
+		t1.intermediaryId = t2.id
+		LEFT JOIN
+		dbo.pro_packProjectRelate t3
+		ON t3.projectPackId = t1.id
+		WHERE
+		t3.projectId = #id#
+		union
+		SELECT
+		t2.intermediaryname FROM
+		dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.sys_intermediaryagency t2
+		ON t1.intermediaryId = t2.id
+		WHERE t1.datapreId = #id#
+		) as
+		intermediaryName
+		FROM
+		dbo.pro_intermediaryaudit t
+		WHERE
+		t.datapreId = #id#
+	</select>
+
+	<select id="getGovermentEmployeeAuditByProjectId"
+		parameterClass="java.lang.String" resultClass="com.audit.entity.project.GovermentEmployeeAudit">
+		SELECT
+		id
+		,auditMoney
+		,reduceMoney
+		,auditStartTime
+		,auditEndTime
+		,auditDayCount
+		,auditRemark
+		FROM
+		dbo.pro_governmentEmployeeAudit
+		WHERE datapreId = #id#
+	</select>
+
+	<select id="getPreProjectMainAuditInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.MainAuditInfo">
+		SELECT
+		t.id,
+		t.auditContentAndScale,
+		t.auditInvestAllMoney,
+		t.auditReportCode,
+		t.auditReportRemark,
+		t.auditReportTime,
+		t.mainAuditPeople,
+		t.noNormMoney,
+		t.otherNoNormMoney,
+		t.projectId,
+		t.reduceMoney as auditReduceAllMoney,
+		t.remark,
+		t.noNormProblem,
+		t.submitState,
+		noNormProblemRemark as problemRemark,
+		otherNoNormRemark
+		as otherNoNormProblem
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE t.projectId =
+		#id#
+	</select>
+	<update id="updateIdeaNoteParamInfo" parameterClass="com.audit.entity.project.IdeaNoteParam">
+		UPDATE
+		dbo.pro_datapreinfo
+		SET
+		id = #id#
+		<isNotEmpty property="addProjectApprovalFile">
+			,addProjectApprovalFile =
+			#addProjectApprovalFile#
+		</isNotEmpty>
+		,budgetInfo = #budgetInfo#
+		<isNotEmpty property="budgetInfoFile">
+			,budgetInfoFile = #budgetInfoFile#
+		</isNotEmpty>
+		<isNotEmpty property="financialRAE">
+			,financialRAE = #financialRAE#
+		</isNotEmpty>
+		,addProjectApproval = #addProjectApproval#
+		,projectAllInvest =
+		#projectAllInvest#
+		<isNotNull property="startDate">
+			,startDate = #startDate#
+		</isNotNull>
+		<isNotNull property="endDate">
+			<isNotEmpty property="endDate">
+				,endDate = #endDate#
+		</isNotEmpty>
+		</isNotNull>
+		,buildMoney = #buildMoney#
+		<isNotNull property="reportEndDate">
+			<isNotEmpty property="reportEndDate">
+				,reportEndDate =
+				#reportEndDate#
+			</isNotEmpty>
+		</isNotNull>
+		,projectAlreadyExistMoney =
+		#projectAlreadyExistMoney#
+		,projectPlanMoney = #projectPlanMoney#
+		,designMoney = #designMoney#
+		,prospectMoney = #prospectMoney#
+		,agencyInviteBidsMoney =
+		#agencyInviteBidsMoney#
+		,supervisionMoney =
+		#supervisionMoney#
+		,projectManageMoney = #projectManageMoney#
+		,otherMoney
+		= #otherMoney#
+		<isNotNull property="contractTime">
+			<isNotEmpty property="contractTime">
+				,contractTime = #contractTime#
+			</isNotEmpty>
+		</isNotNull>
+		<isNotNull property="realityTime">
+			<isNotEmpty property="realityTime">
+				,realityTime =
+				#realityTime#
+			</isNotEmpty>
+		</isNotNull>
+		<isNotNull property="delayTime">
+			<isNotEmpty property="delayTime">
+				,delayTime =
+				#delayTime#
+		</isNotEmpty>
+		</isNotNull>
+		,delayReason = #delayReason#
+		,endWorkManyProjectMoney =
+		#endWorkManyProjectMoney#
+		,projectDirectMoney =
+		#projectDirectMoney#
+		,indirectMoney =
+		#indirectMoney#
+		,settleAccountsAuditMoney =
+		#settleAccountsAuditMoney#
+		,inviteBidsCompany
+		= #inviteBidsCompany#
+		,constructionMoney = #constructionMoney#
+		,budgetUpdateTime =
+		#budgetUpdateTime#
+		,budgetDirectMoney = #budgetDirectMoney#
+		,financialRAETime = #financialRAETime#
+		,budgetTotalMoney =
+		#budgetTotalMoney#
+		WHERE
+		id =
+		#id#
+	</update>
+	<select id="getIdeaNoteParamInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.IdeaNoteResult">
+		SELECT t.id
+		,t.workloadTime
+		,t.prospectTime
+		,t.addProjectApprovalFile
+		,t.budgetInfo
+		,t.budgetInfoFile
+		,t.financialRAE
+		,t.addProjectApproval
+		,t.projectAllInvest
+		,t.inviteBidsCompany
+		,t.constructionMoney
+		,t.winTheBiddingMoney
+		,t.startDate
+		,t.endDate
+		,t.buildMoney
+		,t.reportEndDate
+		,t.projectAlreadyExistMoney
+		,t.projectPlanMoney
+		,t.designMoney
+		,t.prospectMoney
+		,t.agencyInviteBidsMoney
+		,t.supervisionMoney
+		,t.projectManageMoney
+		,t.otherMoney
+		,t.contractTime
+		,t.realityTime
+		,t.delayTime
+		,t.delayReason
+		,t.endWorkManyProjectMoney
+		,t.projectDirectMoney
+		,t.indirectMoney
+		,t.settleAccountsAuditMoney
+		,t.projectName
+		,t1.constructname as constructionName
+		,t1.deptreferred as
+		abbreviation
+		,t2.ownerName as ownerProject
+		FROM dbo.pro_datapreinfo t
+		LEFT JOIN dbo.sys_construction t1
+		ON t.constructId = t1.id
+		LEFT JOIN
+		dbo.sys_projectowner t2
+		ON t.proownerid = t2.id
+		WHERE
+		t.id = #id#
+	</select>
+
+	<select id="checkPackSubProjectSubmitState" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_mainAuditInfo t WHERE
+		t.arrangeId =
+		#arrangeId#
+		AND t.submitState = 0
+	</select>
+
+	<select id="getIdeaNoteInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.IdeaNoteParam">
+		SELECT
+		workloadTime
+		,prospectTime
+		,addProjectApprovalFile
+		,budgetInfo
+		,budgetInfoFile
+		,financialRAE
+		,addProjectApproval
+		,projectAllInvest
+		,inviteBidsCompany
+		,constructionMoney
+		,winTheBiddingMoney
+		,startDate
+		,endDate
+		,reportEndDate
+		,projectAlreadyExistMoney
+		,projectPlanMoney
+		,designMoney
+		,prospectMoney
+		,agencyInviteBidsMoney
+		,supervisionMoney
+		,projectManageMoney
+		,otherMoney
+		,contractTime
+		,realityTime
+		,delayTime
+		,delayReason
+		,endWorkManyProjectMoney
+		,projectDirectMoney
+		,indirectMoney
+		,settleAccountsAuditMoney
+		,buildMoney
+		,financialRAETime
+		,budgetDirectMoney
+		,budgetUpdateTime
+		,budgetTotalMoney
+		FROM
+		dbo.pro_datapreinfo
+		WHERE id =
+		#id#
+	</select>
+
+	<!-- 查询已经录入主审第二阶段信息的项目总数 -->
+	<select id="findAuditIdeaNoteProjectCompleteCount"
+		parameterClass="com.audit.entity.project.ArrangeProject" resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT t2.id FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.ownerName
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		(t2.projectAllInvest is not null or
+		t2.addProjectApprovalFile is not
+		null or
+		t2.budgetInfo is not null or
+		t2.budgetInfoFile is not null or
+		t2.financialRAE is not null or
+		t2.addProjectApproval is not null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		(t3.projectAllInvest is not null or
+		t3.addProjectApprovalFile is not
+		null or
+		t3.budgetInfo is not null or
+		t3.budgetInfoFile is not null or
+		t3.financialRAE is not null or
+		t3.addProjectApproval is not null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 查询已经录入主审第二阶段信息的项目 -->
+	<select id="findAuditIdeaNoteProjectComplete" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$
+		id,projectName,datapreTime,ownerName,constructUnit,isUrgent,timeLimit
+		FROM (
+		SELECT
+		t2.id,t2.projectName,SUBSTRING(CONVERT(varchar,
+		t2.datapretime,120),0,12)
+		as datapreTime,t3.ownerName,t4.constructname
+		as
+		constructUnit,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		(t2.projectAllInvest is not null or
+		t2.addProjectApprovalFile is not
+		null or
+		t2.budgetInfo is not null or
+		t2.budgetInfoFile is not null or
+		t2.financialRAE is not null or
+		t2.addProjectApproval is not null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,
+		t3.datapretime,120),0,12)
+		as datapreTime,t4.ownerName,t5.constructname
+		as constructUnit,
+		t1.isUrgent,
+		t1.timeLimit 
+		FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		(t3.projectAllInvest is not null or
+		t3.addProjectApprovalFile is not
+		null or
+		t3.budgetInfo is not null or
+		t3.budgetInfoFile is not null or
+		t3.financialRAE is not null or
+		t3.addProjectApproval is not null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP ($pagesize$*($pageno$ - 1))
+		id
+		FROM (
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		(t2.projectAllInvest is not null or
+		t2.addProjectApprovalFile is not
+		null or
+		t2.budgetInfo is not null or
+		t2.budgetInfoFile is not null or
+		t2.financialRAE is not null or
+		t2.addProjectApproval is not null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		(t3.projectAllInvest is not null or
+		t3.addProjectApprovalFile is not
+		null or
+		t3.budgetInfo is not null or
+		t3.budgetInfoFile is not null or
+		t3.financialRAE is not null or
+		t3.addProjectApproval is not null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		)t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询未录入主审第二阶段信息的项目总数 -->
+	<select id="findAuditIdeaNoteProjectNoCompleteCount"
+		parameterClass="com.audit.entity.project.ArrangeProject" resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT t2.id FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.ownerName
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		( t2.financialRAE is null )
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		( t3.financialRAE is null )
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 查询未录入主审第二阶段信息的项目 -->
+	<select id="findAuditIdeaNoteProjectNoComplete" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$
+		id,projectName,datapreTime,ownerName,constructUnit,isUrgent,timeLimit
+		FROM (
+		SELECT
+		t2.id,t2.projectName,SUBSTRING(CONVERT(varchar,
+		t2.datapretime,120),0,12)
+		as datapreTime,t3.ownerName,t4.constructname
+		as
+		constructUnit, t1.isUrgent, t1.timeLimit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		( t2.financialRAE is null )
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,
+		t3.datapretime,120),0,12)
+		as datapreTime,t4.ownerName,t5.constructname, t1.isUrgent, t1.timeLimit
+		as constructUnit FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		( t3.financialRAE is null )
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP ($pagesize$*($pageno$ - 1))
+		id
+		FROM (
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		(t1.intermediaryAuditState = '1' OR t1.isMySelfState = '1')
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		( t2.financialRAE is null )
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t1.intermediaryAuditState = '1'
+		AND
+		t6.userAccount = #userAccount#
+		AND
+		( t3.financialRAE is null )
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		)t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询能够已经生成审计通知书的项目总数 -->
+	<select id="findAuditAdviceNoteProjectCompleteCount"
+		parameterClass="com.audit.entity.project.ArrangeProject" resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT t2.id FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.ownerName
+		LEFT JOIN
+		dbo.sys_userinfo t4
+		ON
+		t1.mainAuditId = t4.id
+		WHERE
+		t4.userAccount =
+		#userAccount#
+		AND
+		(t2.workloadTime is not null or t2.prospectTime is not
+		null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON
+		t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		AND
+		(t3.workloadTime is not null or t3.prospectTime is not
+		null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 查询能够已经生成审计通知书的项目 -->
+	<select id="findAuditAdviceNoteProjectComplete" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$
+		id,projectName,datapreTime,ownerName,constructUnit,isUrgent,timeLimit
+		FROM (
+		SELECT
+		t2.id,t2.projectName,SUBSTRING(CONVERT(varchar,
+		t2.datapretime,120),0,12)
+		as datapreTime,t3.ownerName,t2.constructId
+		as constructUnit,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE
+		t5.userAccount =
+		#userAccount#
+		AND
+		(t2.workloadTime is not null or t2.prospectTime is not
+		null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,
+		t3.datapretime,120),0,12)
+		as datapreTime,t4.ownerName,t3.constructId
+		as
+		constructUnit,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		AND
+		(t3.workloadTime is not null or t3.prospectTime is not
+		null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP ($pagesize$*($pageno$ - 1))
+		id
+		FROM (
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE
+		t5.userAccount =
+		#userAccount#
+		AND
+		(t2.workloadTime is not null or t2.prospectTime is not
+		null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		AND
+		(t3.workloadTime is not null or t3.prospectTime is not
+		null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		)t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询能够未生成审计通知书的项目总数 -->
+	<select id="findAuditAdviceNoteProjectNoCompleteCount"
+		parameterClass="com.audit.entity.project.ArrangeProject" resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT t2.id FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.ownerName
+		LEFT JOIN
+		dbo.sys_userinfo t4
+		ON
+		t1.mainAuditId = t4.id
+		WHERE
+		t4.userAccount =
+		#userAccount#
+		AND
+		t2.id is not null
+		AND
+		(t2.workloadTime is null and
+		t2.prospectTime is null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON
+		t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		AND
+		t3.id is not null
+		AND
+		(t3.workloadTime is null and
+		t3.prospectTime is null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 查询能够未生成审计通知书的项目 -->
+	<select id="findAuditAdviceNoteProjectNoComplete"
+		parameterClass="com.audit.entity.project.ArrangeProject" resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$
+		id,projectName,datapreTime,ownerName,constructUnit,isUrgent,timeLimit
+		FROM (
+		SELECT
+		t2.id,t2.projectName,SUBSTRING(CONVERT(varchar,
+		t2.datapretime,120),0,12)
+		as datapreTime,t3.ownerName,t2.constructId
+		as
+		constructUnit,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE
+		t5.userAccount =
+		#userAccount#
+		AND
+		t2.id is not null
+		AND
+		(t2.workloadTime is null and
+		t2.prospectTime is null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,
+		t3.datapretime,120),0,12)
+		as datapreTime,t4.ownerName,t3.constructId
+		as
+		constructUnit,
+		t1.isUrgent,
+		t1.timeLimit
+		FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		AND
+		t3.id is not null
+		AND
+		(t3.workloadTime is null and
+		t3.prospectTime is null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP ($pagesize$*($pageno$ - 1))
+		id
+		FROM (
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_construction t4
+		ON t4.id = t2.constructId
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE
+		t5.userAccount =
+		#userAccount#
+		AND
+		t2.id is not null
+		AND
+		(t2.workloadTime is null and
+		t2.prospectTime is null)
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		union
+		SELECT
+		t3.id FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t4.id = t3.proownerid
+		LEFT JOIN
+		dbo.sys_construction t5
+		ON t3.constructId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		WHERE
+		t6.userAccount =
+		#userAccount#
+		AND
+		t3.id is not null
+		AND
+		(t3.workloadTime is null and
+		t3.prospectTime is null)
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="isUrgent">
+		    AND t1.isUrgent = #isUrgent#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitStart">
+		    AND t1.timeLimit <![CDATA[>=]]> #timeLimitStart#
+		</isNotEmpty>
+		<isNotEmpty property="timeLimitEnd">
+		    AND t1.timeLimit <![CDATA[<=]]> #timeLimitEnd#
+		</isNotEmpty>
+		)t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="getProjectAuditEmployee" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT t2.username FROM dbo.pro_employeeArrangeRelate t
+		LEFT JOIN (
+		SELECT t.id,t.datapreId as projectId From
+		dbo.pro_singleProjectArrange t
+		union
+		SELECT distinct t.id,t1.projectId
+		FROM dbo.pro_packProjectArrange t
+		LEFT JOIN dbo.pro_packProjectRelate
+		t1
+		ON t.id = t1.projectPackId
+		) t1
+		ON t1.id = t.projectArrangeId
+		LEFT JOIN
+		dbo.sys_userinfo t2
+		ON t.governmentEmployeeId = t2.id
+		WHERE t1.projectId
+		= #projectId#
+	</select>
+
+	<!-- 判断是否是金信源项目 -->
+	<select id="checkIsJinXingYuanProject" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t2
+		ON t1.proownerid = t2.id
+		WHERE
+		t2.ownerName =
+		'金信源'
+		AND
+		t1.id = #id#
+	</select>
+
+	<!-- 判断项目是否两百万以上的项目 -->
+	<select id="checkIsTwoMillion" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_datapreinfo t
+		WHERE
+		convert(decimal(18,2),t.sentAmount) >= 2000000
+		AND t.id = #id#
+	</select>
+
+	<!-- 判断是否已经生成征求意见稿 -->
+	<select id="checkIsHaveIdeaNote" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_mainAuditInfo t WHERE
+		t.projectId = #id#
+		AND t.ideaNoteState = '2'
+	</select>
+	
+	<!-- 更新生成审计报告状态 为1-->
+	<update id="updateAuditReportState" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		isAuditReport = '1'
+		WHERE projectId = #id#
+	</update>
+	
+	<!-- 更新生成审计报告状态 为0-->
+	<update id="updateAuditReportStateBack" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		isAuditReport = '0'
+		WHERE id = #id#
+	</update>
+
+	<!-- 更新生成征求意见稿状态 为1-->
+	<update id="updateIdeaNoteState" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		ideaNoteState = '1'
+		WHERE projectId = #id#
+	</update>
+	
+	<!-- 更新生成征求意见稿状态 为0 -->
+	<update id="updateIdeaNoteStateBack" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		ideaNoteState = '0'
+		WHERE id = #id#
+	</update>
+	
+	<!-- 更新生成征求意见稿状态 为2 -->
+	<update id="updateIdeaNoteStateComplete" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		ideaNoteState = '2'
+		WHERE id = #id#
+	</update>
+	
+	<!-- 更新项目审计状态状态 为 -->
+	<update id="updateProjectAuditStateComplete" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_mainAuditInfo
+		SET
+		submitState = '1'
+		WHERE id = #id#
+	</update>
+	
+	<!-- 插入核对工作量信息 -->
+	<insert id="insertWorkloadInfo" parameterClass="com.audit.entity.project.WorkloadInfo">
+	INSERT INTO dbo.pro_workLoadTime
+           (id
+           ,projectId
+           ,startTime
+           ,endTime
+           ,context)
+     VALUES
+           (#id#
+           ,#projectId#
+           ,#startTime#
+           ,#endTime#
+           ,#context#)
+	</insert>
+
+	<!-- 删除工作量信息 -->
+	<delete id="deleteWorkloadInfo" parameterClass="java.lang.String">
+		DELETE FROM dbo.pro_workLoadTime
+		WHERE projectId = #projectId#
+	</delete>
+
+	<!-- 获取核对工作量信息 -->
+	<select id="selectWorkloadInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.WorkloadInfo">
+		SELECT
+		id,
+		projectId,
+		startTime,
+		endTime,
+		context
+		FROM dbo.pro_workLoadTime
+		WHERE
+		projectId = #projectId#
+	</select>
+	
+	<!-- 判断是否生成征求意见稿 -->
+	<select id="checkIsIdeaNoteState" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+	    SELECT COUNT(1) FROM dbo.pro_mainAuditInfo t WHERE (t.ideaNoteState <![CDATA[<>]]> '1' OR t.ideaNoteState is null)
+        AND t.projectId = #id#
+	</select>
+	
+	<!-- 判断是否生成审计报告 -->
+	<select id="checkIsAuditReportState" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+	    SELECT COUNT(1) FROM dbo.pro_mainAuditInfo t WHERE (t.isAuditReport <![CDATA[<>]]> '1' OR t.isAuditReport is null)
+        AND t.projectId = #id#
+	</select>
+
+    <!-- 查询投资科室已经审签的项目总数 -->
+	<select id="investAlreadyAuditProjectCount" parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT Count(1) FROM (
+			SELECT
+			t.arrangeId,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isInvestLeaderAudit is not null
+			AND t.investLeaderUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 查询投资科室已经审签的项目总数 -->
+	<select id="investAlreadyAuditProject" parameterClass="com.audit.entity.project.AuditInfo" resultClass="com.audit.entity.project.AuditInfo">
+	        SELECT
+	        TOP $pagesize$
+			t3.id,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName as intermediary,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isInvestLeaderAudit is not null
+			AND t.investLeaderUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			AND t3.id not in (
+			SELECT TOP ($pagesize$*($pageno$ - 1)) t3.id
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isInvestLeaderAudit is not null
+			AND t.investLeaderUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+			)
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+	</select>
+
+	<!-- 投资科室签审意见信息 -->
+	<select id="getInvestDepartAuditView" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.InvestDepartAuditView">
+		SELECT
+		t.investLeaderAuditRemark,
+		t.investLeaderAuditTime,
+		t.isInvestLeaderAudit,
+		t.investLeaderUserAccount
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE t.arrangeId = #id#
+	</select>
+	
+	<!-- 法制科室签审意见信息 -->
+	<select id="getLegalDepartAuditView" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.LegalDepartAuditView">
+		SELECT
+		t.legalAuditTime as legalLeaderAuditTime,
+		t.legalAuditUserAccount as legalLeaderUserAccount,
+		t.legalAuditRemark as legalLeaderAuditRemark,
+		t.isLegalAudit as isLegalLeaderAudit
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE t.arrangeId = #id#
+	</select>
+	
+	<!-- 总审计师签审意见信息 -->
+	<select id="getTotalAuditorAuditView" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.TotalAuditorView">
+		SELECT
+		t.totalAuditTime,
+		t.totalAuditUserAccount,
+		t.totalAuditRemark,
+		t.isTotalAudit
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE t.arrangeId = #id#
+	</select>
+	
+	<!-- 分管领导签审意见信息 -->
+	<select id="getAreaLeaderAuditView" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.AreaLeaderView">
+		SELECT
+		t.areaLeaderAuditTime,
+		t.areaLeaderAuditUserAccount,
+		t.areaLeaderAuditRemark,
+		t.isAreaLeaderAudit
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE t.arrangeId = #id#
+	</select>
+
+	<!-- 更新投资科室审签意见 -->
+	<update id="updateInvestDepartAuditView" parameterClass="com.audit.entity.project.InvestDepartAuditView">
+		UPDATE dbo.pro_mainAuditInfo
+		SET
+		investLeaderAuditRemark = #investLeaderAuditRemark#,
+		investLeaderAuditTime = #investLeaderAuditTime#,
+		isInvestLeaderAudit = #isInvestLeaderAudit#,
+		investLeaderUserAccount = #investLeaderUserAccount#
+		WHERE
+		id = #mainAuditId#
+	</update>
+	
+	<!-- 更新法制科室审签意见 -->
+	<update id="updateLegalDepartAuditView" parameterClass="com.audit.entity.project.LegalDepartAuditView">
+		UPDATE dbo.pro_mainAuditInfo
+		SET
+		legalAuditRemark = #legalLeaderAuditRemark#,
+		legalAuditTime = #legalLeaderAuditTime#,
+		isLegalAudit = #isLegalLeaderAudit#,
+		legalAuditUserAccount = #legalLeaderUserAccount#
+		WHERE
+		id = #mainAuditId#
+	</update>
+	
+	<!-- 更新总审计师审签意见 -->
+	<update id="updateTotalAuditorAuditView" parameterClass="com.audit.entity.project.TotalAuditorView">
+		UPDATE dbo.pro_mainAuditInfo
+		SET
+		totalAuditTime = #totalAuditTime#,
+		totalAuditUserAccount = #totalAuditUserAccount#,
+		totalAuditRemark = #totalAuditRemark#,
+		isTotalAudit = #isTotalAudit#
+		WHERE
+		id = #mainAuditId#
+	</update>
+	
+	<!-- 更新分管领导审签意见 -->
+	<update id="updateAreaLeaderAuditView" parameterClass="com.audit.entity.project.AreaLeaderView">
+		UPDATE dbo.pro_mainAuditInfo
+		SET
+		areaLeaderAuditTime = #areaLeaderAuditTime#,
+		areaLeaderAuditUserAccount = #areaLeaderAuditUserAccount#,
+		areaLeaderAuditRemark = #areaLeaderAuditRemark#,
+		isAreaLeaderAudit = #isAreaLeaderAudit#
+		WHERE
+		id = #mainAuditId#
+	</update>
+	
+	<!-- 判断项目是否在自己手中 -->
+	<select id="isMySelfProject" parameterClass="com.audit.entity.project.InvestDepartAuditView" resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.flowView_mywork t
+		WHERE t.projectDateId = #mainAuditId#
+		AND t.userAccount = #investLeaderUserAccount#
+	</select>
+	
+	<!-- 获取主审项目ID -->
+	<select id="getProjectByMainAuditId" parameterClass="java.lang.String" resultClass="java.lang.String">
+	    SELECT
+		t.projectId
+		FROM
+		dbo.pro_mainAuditInfo t
+		WHERE t.id = #id#
+	</select>
+
+	<!-- 是否是征求意见稿 -->
+	<select id="isSeekIdeaNote" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM dbo.pro_mainAuditInfo WHERE id = #mainAuditId# AND
+		ideaNoteState is not null AND isAuditReport is null
+	</select>
+	
+	
+	
+	<!-- 查询法制科室已经审签的项目总数 -->
+	<select id="legalAlreadyAuditProjectCount" parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT Count(1) FROM (
+			SELECT
+			t.arrangeId,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isLegalAudit is not null
+			AND t.legalAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 查询法制科室已经审签的项目总数 -->
+	<select id="legalAlreadyAuditProject" parameterClass="com.audit.entity.project.AuditInfo" resultClass="com.audit.entity.project.AuditInfo">
+	        SELECT
+	        TOP $pagesize$
+			t3.id,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName as intermediary,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isLegalAudit is not null
+			AND t.legalAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			AND t3.id not in (
+			SELECT TOP ($pagesize$*($pageno$ - 1)) t3.id
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isLegalAudit is not null
+			AND t.legalAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+			)
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+	</select>
+	
+	<!-- 查询总审计师已经审签的项目总数 -->
+	<select id="totalAuditorAlreadyAuditProjectCount" parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT Count(1) FROM (
+			SELECT
+			t.arrangeId,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isTotalAudit is not null
+			AND t.totalAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 查询总审计师已经审签的项目总数 -->
+	<select id="totalAuditorAlreadyAuditProject" parameterClass="com.audit.entity.project.AuditInfo" resultClass="com.audit.entity.project.AuditInfo">
+	        SELECT
+	        TOP $pagesize$
+			t3.id,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName as intermediary,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isTotalAudit is not null
+			AND t.totalAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			AND t3.id not in (
+			SELECT TOP ($pagesize$*($pageno$ - 1)) t3.id
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isTotalAudit is not null
+			AND t.totalAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+			)
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+	</select>
+	
+	<!-- 查询分管领导已经审签的项目总数 -->
+	<select id="areaLeaderAlreadyAuditProjectCount" parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT Count(1) FROM (
+			SELECT
+			t.arrangeId,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isAreaLeaderAudit is not null
+			AND t.areaLeaderAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 查询分管领导已经审签的项目总数 -->
+	<select id="areaLeaderAlreadyAuditProject" parameterClass="com.audit.entity.project.AuditInfo" resultClass="com.audit.entity.project.AuditInfo">
+	        SELECT
+	        TOP $pagesize$
+			t3.id,
+			t1.projectName,
+			t2.ownerName,
+			t4.intermediaryName as intermediary,
+			t5.username as mainAuditName
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isAreaLeaderAudit is not null
+			AND t.areaLeaderAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			AND t3.id not in (
+			SELECT TOP ($pagesize$*($pageno$ - 1)) t3.id
+			FROM dbo.pro_mainAuditInfo t
+			LEFT JOIN dbo.pro_datapreinfo t1
+			ON t.projectId = t1.id
+			LEFT JOIN dbo.sys_projectowner t2
+			ON t1.proownerid = t2.id
+			LEFT JOIN dbo.pro_singleProjectArrange t3
+			ON t.arrangeId = t3.id
+			LEFT JOIN dbo.sys_intermediaryagency t4
+			ON t3.intermediaryId = t4.id
+			LEFT JOIN dbo.sys_userinfo t5
+			ON t5.id = t3.mainAuditId
+			WHERE t.isAreaLeaderAudit is not null
+			AND t.areaLeaderAuditUserAccount = #userAccount#
+			<isNotEmpty property="ownerName">
+				AND t2.ownerName like '%$ownerName$%'
+			</isNotEmpty>
+			<isNotEmpty property="projectName">
+				AND t1.projectName like '%$projectName$%'
+			</isNotEmpty>
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+			)
+			<dynamic prepend="order by">
+				<isNotEmpty property="filed">
+					$filed$ $sort$
+		    </isNotEmpty>
+			</dynamic>
+			<isEmpty property="filed">
+				order by id desc
+			</isEmpty>
+	</select>
+</sqlMap>
+

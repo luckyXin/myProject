@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="changeCard">
+
+	<!-- 删除月报附件 -->
+	<delete id="deleteChangeCardFile" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.pro_tractProjectChangeCardFile WHERE id = #id#
+    </delete>
+
+	<!-- 获取月报文件 -->
+	<select id="getChangeCardFile" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.FileBelongRelate">
+		SELECT
+		id
+		,belongToId
+		,url
+		,fileName
+		,uploadTime
+		FROM
+		dbo.pro_tractProjectChangeCardFile
+		WHERE id = #id#
+    </select>
+
+	<!-- 月报附件总数查询 -->
+	<select id="findChangeCardFileCount" parameterClass="com.audit.entity.project.FileBelongRelate"
+		resultClass="java.lang.Integer">
+		select count(*) from dbo.pro_tractProjectChangeCardFile
+		where
+		belongToId=#belongToId#
+	</select>
+
+	<!-- 月报附件信息查询 -->
+	<select id="findChangeCardFile" parameterClass="com.audit.entity.project.FileBelongRelate"
+		resultClass="com.audit.entity.project.FileBelongRelate">
+		select * from dbo.pro_tractProjectChangeCardFile where
+		belongToId=#belongToId#
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 跟踪项目变更签证 -->
+	<select id="getTractProjectChangeCardInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.TractProjectChangeCardInfo">
+		SELECT id
+		,changeCode
+		,changeContext
+		,changeTime
+		,changeType
+		,constructSentMoney
+		,createUserAccount
+		,createTime
+		,updateTime
+		,biaoDuanId
+		,tractAuditAdviceMoney
+		,affirmChangeMoney
+		,changeAndNowSiteInfo
+		,changeProccessCondition
+		,prospectSurMoney
+		FROM
+		dbo.pro_tractProjectChangeCode
+		WHERE id = #id#
+	</select>
+
+	<!-- 跟踪审计项目变更签证插入 -->
+	<insert id="insertTractProjectChangeCode" parameterClass="com.audit.entity.project.TractProjectChangeCardInfo">
+		INSERT
+		INTO dbo.pro_tractProjectChangeCode
+		(id
+		,changeCode
+		,changeContext
+		,changeTime
+		,changeType
+		,constructSentMoney
+		,createUserAccount
+		,createTime
+		,updateTime
+		,biaoDuanId
+		,tractAuditAdviceMoney
+		,affirmChangeMoney
+		,changeAndNowSiteInfo
+		,changeProccessCondition
+		,prospectSurMoney
+		)
+		VALUES
+		(#id#
+		,#changeCode#
+		,#changeContext#
+		,#changeTime#
+		,#changeType#
+		,#constructSentMoney#
+		,#createUserAccount#
+		,getDate()
+		,getDate()
+		,#biaoDuanId#
+		,#tractAuditAdviceMoney#
+		,#affirmChangeMoney#
+		,#changeAndNowSiteInfo#
+		,#changeProccessCondition#
+		,#prospectSurMoney#
+		)
+	</insert>
+
+	<!-- 更新跟踪审计项目变更签证内容 -->
+	<update id="updateTractProjectChangeCode" parameterClass="com.audit.entity.project.TractProjectChangeCardInfo">
+		UPDATE
+		dbo.pro_tractProjectChangeCode
+		SET
+		changeCode = #changeCode#
+		,changeContext = #changeContext#
+		,changeTime = #changeTime#
+		,changeType
+		= #changeType#
+		,constructSentMoney = #constructSentMoney#
+		,updateTime =
+		getDate()
+		,tractAuditAdviceMoney = #tractAuditAdviceMoney#
+		,affirmChangeMoney = #affirmChangeMoney#
+		,changeAndNowSiteInfo =
+		#changeAndNowSiteInfo#
+		,changeProccessCondition =
+		#changeProccessCondition#
+		,prospectSurMoney=#prospectSurMoney#
+		WHERE id = #id#
+	</update>
+
+	<!-- 查询跟踪项目变更签证总数 -->
+	<select id="findTractProjectChangeCardCount" parameterClass="com.audit.entity.project.TractProjectChangeCardInfo"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		dbo.pro_tractProjectChangeCode
+		WHERE
+		biaoDuanId = #biaoDuanId#
+		<isNotEmpty property="createUserAccount">
+		AND createUserAccount = #createUserAccount# 
+		</isNotEmpty>
+		<isNotEmpty property="changeType">
+		AND changeType = #changeType#
+        </isNotEmpty>
+	</select>
+
+	<!-- 查询跟踪项目变更签证信息 -->
+	<select id="findTractProjectChangeCard" parameterClass="com.audit.entity.project.TractProjectChangeCardInfo"
+		resultClass="com.audit.entity.project.TractProjectChangeCardInfo">
+		SELECT TOP $pagesize$
+		id
+		,changeCode
+		,changeContext
+		,changeTime
+		,changeType
+		,constructSentMoney
+		,createUserAccount
+		,createTime
+		,updateTime
+		,biaoDuanId
+		,tractAuditAdviceMoney
+		,affirmChangeMoney
+		,changeAndNowSiteInfo
+		,changeProccessCondition
+		FROM
+		dbo.pro_tractProjectChangeCode
+		WHERE id not in (
+		SELECT TOP ($pagesize$
+		* ($pageno$ - 1))
+		id
+		FROM
+		dbo.pro_tractProjectChangeCode
+		WHERE
+		biaoDuanId = #biaoDuanId#
+		<isNotEmpty property="createUserAccount">
+		AND createUserAccount = #createUserAccount# 
+		</isNotEmpty>
+		<isNotEmpty property="changeType">
+		AND changeType = #changeType#
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by createTime desc
+	    </isEmpty>
+
+		)
+		AND biaoDuanId = #biaoDuanId#
+		<isNotEmpty property="createUserAccount">
+		AND createUserAccount = #createUserAccount# 
+		</isNotEmpty>
+		<isNotEmpty property="changeType">
+		AND changeType = #changeType#
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by createTime desc
+	    </isEmpty>
+	</select>
+
+	<!-- 删除变更签证信息 -->
+	<delete id="deleteTractChangeCard" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.pro_tractProjectChangeCode WHERE id = #id#
+	</delete>
+</sqlMap>

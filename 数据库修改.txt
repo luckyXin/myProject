@@ -1,0 +1,5 @@
+表
+pro_governmentAssign
+添加列
+
+currenttime data null 当前时间

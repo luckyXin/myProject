@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Intermediaryagency">
+
+   <typeAlias alias="Intermediaryagency" type="com.audit.entity.staff.Intermediaryagency"/>
+   <typeAlias alias="Link" type="com.audit.entity.staff.Link"/>
+   
+   <select id="getIntermediaryagencyById" parameterClass="java.lang.String"
+		resultClass="Intermediaryagency">
+		SELECT
+			id
+		,intermediaryname
+		,referred
+		,businesstype
+		,deptqualifica
+		,legal
+		,regaddress
+		,address
+		,istenderunit
+		,bidyear
+		,manageragency
+		,remark
+				FROM 
+					dbo.sys_intermediaryagency
+						WHERE 
+							id = #id#
+   </select>
+
+	<select id="getIntermediaryagencyCount" parameterClass="Intermediaryagency"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.sys_intermediaryagency where 1=1
+		<isNotEmpty property="intermediaryname">
+			and intermediaryname LIKE '%$intermediaryname$%'
+		</isNotEmpty>
+		<isNotEmpty property="bidyear">
+			and bidyear = #bidyear#
+		</isNotEmpty>
+	</select>
+
+
+	
+	<select id="getIntermediaryagencyByIndexCount" parameterClass="Intermediaryagency"
+		resultClass="Intermediaryagency">
+		SELECT TOP $pagesize$
+			i.id,
+			i.intermediaryname,
+			i.referred,
+			i.regaddress,
+			legal,
+			d1.dictionaryname as deptqualifica,
+	     	d2.dictionaryname as businesstype,
+	     	d3.dictionaryname as bidyear,
+	     	dep.deptname as manageragency
+		FROM
+		sys_intermediaryagency i
+		left join sys_dictionary d1
+		on i.deptqualifica = d1.id
+		left join sys_dictionary d2
+		on i.businesstype = d2.id
+		left join sys_dictionary d3
+		on i.bidyear = d3.id
+		left join sys_department dep
+		on i.manageragency = dep.id
+		WHERE i.id >
+		(
+		SELECT ISNULL(MAX(id),0)
+		FROM
+		(
+		SELECT TOP <![CDATA[($pagesize$*$pageno$)]]>
+		i.id FROM
+		sys_intermediaryagency i
+		left join sys_dictionary d1
+		on i.deptqualifica = d1.id
+		left join sys_dictionary d2
+		on i.businesstype = d2.id
+		left join sys_dictionary d3
+		on i.bidyear = d3.id
+		left join sys_department dep
+		on i.manageragency = dep.id
+		WHERE 1=1
+		<isNotEmpty property="intermediaryname">
+			AND i.intermediaryname LIKE '%$intermediaryname$%'
+		</isNotEmpty>
+		<isNotEmpty property="bidyear">
+			and bidyear = #bidyear#
+		</isNotEmpty>
+		ORDER BY id
+		) A
+		)
+		<isNotEmpty property="intermediaryname">
+			AND i.intermediaryname LIKE '%$intermediaryname$%'
+		</isNotEmpty>
+		<isNotEmpty property="bidyear">
+			and bidyear = #bidyear#
+		</isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+	        </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			ORDER BY id
+	    </isEmpty>
+	</select>
+
+	<insert id="addIntermediaryagency" parameterClass="Intermediaryagency">
+		INSERT INTO dbo.sys_intermediaryagency
+		(id
+		,intermediaryname
+		,referred
+		,businesstype
+		,deptqualifica
+		,legal
+		,regaddress
+		,address
+		,istenderunit
+		,bidyear
+		,manageragency
+		,remark)
+		VALUES
+		(#id#
+		,#intermediaryname#
+		,#referred#
+		,#businesstype#
+		,#deptqualifica#
+		,#legal#
+		,#regaddress#
+		,#address#
+		,#istenderunit#
+		,#bidyear#
+		,#manageragency#
+		,#remark#)
+	</insert>
+
+	<select id="getIntermediaryagencyID" resultClass="java.lang.Integer">
+		Select max(convert(int,id)) from sys_intermediaryagency
+	</select>
+	
+	<delete id="deleteIntermediaryagency" parameterClass="java.lang.String">
+		delete from sys_intermediaryagency where id = #id#
+	</delete>
+	
+	<update id = "updateIntermediaryagency" parameterClass="Intermediaryagency">
+		update sys_intermediaryagency set 
+			intermediaryname = #intermediaryname#
+			,referred = #referred#
+			,businesstype = #businesstype#
+			,deptqualifica = #deptqualifica#
+			,legal = #legal#
+			,regaddress = #regaddress#
+			,address = #address#
+			,istenderunit = #istenderunit#
+			,bidyear = #bidyear#
+			,manageragency = #manageragency#
+			,remark  = #remark#
+				where id = #id#
+	</update>
+
+</sqlMap>
+

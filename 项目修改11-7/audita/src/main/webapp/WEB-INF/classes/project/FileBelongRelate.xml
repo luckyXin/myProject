@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="fileBelongRelatexml">
+    <!-- 分页查询的动态sql -->
+	  <select id="selectFileBelongRelatepage" parameterClass="com.audit.entity.project.FileBelongRelate" resultClass="com.audit.entity.project.FileBelongRelate">   
+	      select * from pro_fileBelongRelate where belongToId=#belongToId#
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  <!-- 查询总的记录条数 -->
+	   <select id="selectFileBelongRelatecount" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	      select count(*) from pro_fileBelongRelate where belongToId=#belongToId#
+	  </select> 
+	  
+	  <!--  查询资料预审文件对象-->
+	   <select id="selectdataprefilebyid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.FileBelongRelate">   
+	       select * from  pro_fileBelongRelate where id=#id#
+	  </select> 
+	  
+	  <!--  查询资料预审文件对象-->
+	   <select id="selectdataprefileshumu" parameterClass="java.lang.String"  resultClass="java.lang.Integer">   
+	       select count(*) from  pro_fileBelongRelate where belongToId=#id#
+	  </select> 
+	  
+	  
+	  <!-- 增加 -->
+	   <insert id="addfile"  parameterClass="com.audit.entity.project.FileBelongRelate">
+	           insert into pro_fileBelongRelate
+	           (id,belongToId,url,fileName,state,uploadTime) 
+	           values
+	            (#id#,#belongToId#,#url#,#fileName#,#state#,#uploadTime#)  
+		</insert>
+		
+		 <!-- 增加月报文件 -->
+	   <insert id="addMonthfile"  parameterClass="com.audit.entity.project.FileBelongRelate">
+	           insert into dbo.pro_tractMonthReportFile
+	           (id,belongToId,url,fileName,uploadTime) 
+	           values
+	            (#id#,#belongToId#,#url#,#fileName#,#uploadTime#)  
+		</insert>
+		
+		 <!-- 增加月报文件 -->
+	   <insert id="addChangeCardfile"  parameterClass="com.audit.entity.project.FileBelongRelate">
+	           insert into dbo.pro_tractProjectChangeCardFile
+	           (id,belongToId,url,fileName,uploadTime) 
+	           values
+	            (#id#,#belongToId#,#url#,#fileName#,#uploadTime#)  
+		</insert>
+		
+		<!-- 删除 -->
+		<delete id="deleteFile" parameterClass="java.lang.String">
+		       delete from pro_fileBelongRelate where id=#id#
+		
+		</delete>
+</sqlMap>
+

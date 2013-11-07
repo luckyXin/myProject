@@ -1,0 +1,99 @@
+.shang {
+	MARGIN-TOP: 10px;
+	DISPLAY: inline;
+	FLOAT: left;
+	MARGIN-LEFT: 38px;
+	OVERFLOW: hidden;
+	WIDTH: 489px
+}
+
+.shang P {
+	BACKGROUND: url(images/index_tt.jpg) no-repeat;
+	WIDTH: 489px;
+	LINE-HEIGHT: 33px;
+	HEIGHT: 33px
+}
+
+.shang UL {
+	BORDER-RIGHT: #c5dee5 1px solid;
+	BORDER-TOP: #c5dee5 1px solid;
+	BACKGROUND: #fdfffb;
+	OVERFLOW: hidden;
+	BORDER-LEFT: #c5dee5 1px solid;
+	BORDER-BOTTOM: #c5dee5 1px solid;
+	HEIGHT: 157px
+}
+
+.shang UL LI {
+	PADDING-LEFT: 40px;
+	BACKGROUND: url(images/li.jpg) no-repeat 10px 5px;
+	MARGIN-LEFT: 5px;
+	LINE-HEIGHT: 24px;
+	MARGIN-RIGHT: 5px;
+	BORDER-BOTTOM: #c5dee5 1px dotted;
+	HEIGHT: 24px
+}
+
+.shang1 {
+	MARGIN-TOP: 4px;
+	MARGIN-LEFT: 38px;
+	OVERFLOW: hidden;
+	WIDTH: 1014px
+}
+
+.shang1 P {
+	BACKGROUND: url(images/shang.jpg) no-repeat;
+	WIDTH: 1014px;
+	LINE-HEIGHT: 33px;
+	HEIGHT: 33px
+}
+
+.shang1 UL {
+	BORDER-RIGHT: #c5dee5 1px solid;
+	BORDER-TOP: #c5dee5 1px solid;
+	BACKGROUND: #fdfffb;
+	OVERFLOW: hidden;
+	BORDER-LEFT: #c5dee5 1px solid;
+	BORDER-BOTTOM: #c5dee5 1px solid;
+	HEIGHT: 157px
+}
+
+.shang1 UL LI {
+	PADDING-LEFT: 40px;
+	BACKGROUND: url(images/li.jpg) no-repeat 10px 5px;
+	MARGIN-LEFT: 5px;
+	LINE-HEIGHT: 24px;
+	MARGIN-RIGHT: 5px;
+	BORDER-BOTTOM: #c5dee5 1px dotted;
+	HEIGHT: 24px
+}
+
+.shang2 {
+	BORDER-RIGHT: #c5dee5 1px solid;
+	BORDER-TOP: #c5dee5 1px solid;
+	MARGIN-TOP: 10px;
+	DISPLAY: inline;
+	FLOAT: left;
+	MARGIN-LEFT: 38px;
+	OVERFLOW: hidden;
+	BORDER-LEFT: #c5dee5 1px solid;
+	WIDTH: 800px;
+	BORDER-BOTTOM: #c5dee5 1px solid
+}
+
+.shang2 P {
+	BACKGROUND: url(images/Index_ttToal.png) no-repeat;
+	WIDTH: 800px;
+	LINE-HEIGHT: 33px;
+	HEIGHT: 33px
+}
+
+.shang2 TD {
+	BORDER-RIGHT: #c5dee5 1px dotted;
+	BORDER-TOP: #c5dee5 1px dotted;
+	OVERFLOW: hidden;
+	BORDER-LEFT: #c5dee5 1px dotted;
+	WIDTH: 15%;
+	BORDER-BOTTOM: #c5dee5 1px dotted;
+	TEXT-ALIGN: center
+}

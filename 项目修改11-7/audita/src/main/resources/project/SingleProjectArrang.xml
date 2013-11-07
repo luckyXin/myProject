@@ -1,0 +1,1258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="singleProjectArrang">
+	<select id="findSingleProjectArrangAllCount" parameterClass="com.audit.entity.project.SingleProjectInfo"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		= t3.id
+		WHERE
+		t2.state = '0'
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND t1.userAccount = #userAccount#
+		</isNotEmpty>
+	</select>
+
+	<select id="findSingleProjectArrang" parameterClass="com.audit.entity.project.SingleProjectInfo"
+		resultClass="com.audit.entity.project.SingleProjectInfo">
+		SELECT TOP $pagesize$
+		id,projectName,ownerName,sentAmount,datapreTime,state,isArrangement
+		FROM (
+		SELECT
+		t1.id as
+		id,t2.projectName as projectName,t3.ownerName as
+		ownerName,t2.sentAmount as sentAmount,SUBSTRING(CONVERT(varchar,
+		t2.datapretime, 120) as
+		datapreTime,t1.state,t2.isArrangement
+		FROM
+		dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		WHERE
+		t2.state = '0'
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND t1.userAccount = #userAccount#
+		</isNotEmpty>
+		) t1
+		WHERE
+		(id NOT
+		IN(SELECT TOP
+		($pagesize$*($pageno$ - 1)) id
+		FROM
+		(SELECT
+		t1.id as id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid
+		=
+		t3.id
+		WHERE
+		t2.state = '0'
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND t1.userAccount = #userAccount#
+		</isNotEmpty>
+		) t4
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by datapreTime desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by datapreTime desc
+	    </isEmpty>
+	</select>
+
+	<select id="findArrangeProjectAllCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t1.proownerid = t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND t4.userAccount =
+		#userAccount#
+		left join pro_assignRelate t5
+		on  t1.id=t5.projectId 
+		WHERE
+		t1.id is not null
+		AND t4.module = #moduleid#
+		AND t4.state = '0'
+		and t5.governmentAssignId is null
+		<isNotEmpty property="ownerId">
+			AND t3.id=#ownerId#
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<select id="findArrangeProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$ id,datapreno,projectName,constructname as
+		constructUnit,sentAmount,ownerName,state as
+		dateState,SUBSTRING(CONVERT(varchar,
+		datapreTime, 120),0,12) as
+		datapreTime, isArrangement,assignState,reportBatch FROM (
+		SELECT
+		t1.id,t1.datapreno,t1.projectName,t1.sentAmount,t1.constructId as constructname ,t3.ownerName,t1.state,t1.datapretime,t1.isArrangement,'0'
+		as
+		assignState,t7.reportBatch
+		FROM
+		dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id =
+		t4.projectDateId
+		AND
+		t4.userAccount = #userAccount#
+		left join pro_assignRelate t5
+		on  t1.id=t5.projectId 
+		left join pro_assignRelate t6
+		on t1.id=t6.projectId 
+		left join pro_governmentAssign t7
+		on  t7.id =t6.governmentAssignId 
+		WHERE
+		t1.id is not null
+		AND t4.module = #moduleid#
+		AND t4.state = '0'
+		and t5.governmentAssignId is null
+		<isNotEmpty property="ownerId">
+			AND t3.id=#ownerId#
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t5
+		WHERE (id not IN
+		(SELECT TOP($pagesize$*($pageno$ - 1)) t1.id FROM
+		dbo.pro_datapreinfo
+		t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND
+		t4.userAccount =
+		#userAccount#
+		left join pro_assignRelate t5
+		on  t1.id=t5.projectId 
+		WHERE
+		t1.id is not null
+		AND t4.module = #moduleid#
+		AND t4.state = '0'
+		and t5.governmentAssignId is null
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="findEmployeeCount" parameterClass="com.audit.entity.project.Employee"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM dbo.sys_userinfo WHERE istype = '1'
+		<isNotEmpty property="userName">
+			AND username like
+			'%$userName$%'
+		</isNotEmpty>
+	</select>
+
+	<select id="findEmployee" parameterClass="com.audit.entity.project.Employee"
+		resultClass="com.audit.entity.project.Employee">
+		SELECT top $pagesize$ id as id,username as userName,telPhone as
+		telPhone,dictionaryname as sex,deptname as deptName FROM
+		(SELECT
+		t1.id
+		as id,t1.username,t1.telPhone,t2.dictionaryname,t3.deptname
+		from
+		dbo.sys_userinfo t1
+		LEFT JOIN dbo.sys_dictionary t2
+		ON t1.sex = t2.id
+		LEFT JOIN dbo.sys_department t3
+		ON t1.deptid = t3.id
+		WHERE istype = '1'
+		<isNotEmpty property="userName">
+			AND t1.username like '%$userName$%'
+		</isNotEmpty>
+		) t4
+		WHERE (id NOT IN(SELECT TOP($pagesize$*($pageno$ - 1)) t1.id FROM
+		dbo.sys_userinfo t1
+		LEFT JOIN dbo.sys_dictionary t2
+		ON t1.sex = t2.id
+		LEFT JOIN
+		dbo.sys_department t3
+		ON t1.deptid = t3.id
+		WHERE istype = '1'
+		<isNotEmpty property="userName">
+			AND t1.username like
+			'%$userName$%'
+		</isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="getSingleProjectMaxId" resultClass="java.lang.Integer">
+		SELECT
+		MAX(SUBSTRING
+		(id,4,len(id))) FROM dbo.pro_singleProjectArrange
+	</select>
+
+	<insert id="addSingleProjectArrange" parameterClass="com.audit.entity.project.SingleProjectArrange">
+		INSERT INTO
+		dbo.pro_singleProjectArrange
+		(id
+		,datapreId
+		<isNotEmpty property="projectTime">
+		,projectTime
+		</isNotEmpty>
+		,projectRemark
+		,intermediaryId
+		,intermediaryAuditState
+		,governmentEmployeeAuditState
+		,sectionChiefAuditState
+		,areaLeaderAuditState
+		,mainAuditState
+		,mainAuditId
+		<isNotEmpty property="intermediarySendTime">
+		,intermediarySendTime
+		</isNotEmpty>
+		,isMySelfState
+		,state
+		<isNotEmpty property="intermediaryAuditTime">
+		,intermediaryAuditTime
+		</isNotEmpty>
+		,legalSectionChiefAuditState
+		,legalAreaLeaderAuditState
+		,userAccount
+		<isNotEmpty property="dataTransferTime">
+		,dataTransferTime
+		</isNotEmpty>)
+		VALUES
+		(#id#
+		,#datapreId#
+		<isNotEmpty property="projectTime">
+		,#projectTime#
+		</isNotEmpty>
+		,#projectRemark#
+		,#intermediaryId#
+		,'0'
+		,'0'
+		,'0'
+		,'0'
+		,'0'
+		,#mainAuditId#
+		<isNotEmpty property="intermediarySendTime">
+		,#intermediarySendTime#
+		</isNotEmpty>
+		,#isMySelfState#
+		,'0'
+		<isNotEmpty property="intermediaryAuditTime">
+		,#intermediaryAuditTime#
+		</isNotEmpty>
+		,'0'
+		,'0'
+		,#userAccount#
+		<isNotEmpty property="dataTransferTime">
+		,#dataTransferTime#
+		</isNotEmpty>)
+	</insert>
+
+	<insert id="addEmployeeArrangeRelete" parameterClass="com.audit.entity.project.EmployeeArrangeRelate">
+		INSERT INTO
+		[auditdb].[dbo].[pro_employeeArrangeRelate]
+		(id
+		,projectArrangeId
+		,governmentEmployeeId
+		,auditState)
+		VALUES
+		(#id#
+		,#projectArrangeId#
+		,#governmentEmployeeId#
+		,'0')
+	</insert>
+
+	<update id="updateProjectArrangeState" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_datapreinfo
+		SET isArrangement = '1'
+		WHERE id = #id#
+	</update>
+
+    <update id="updateSingleIntermediaryByLegalSectionChief" parameterClass="com.audit.entity.project.ArrangeProject">
+		UPDATE
+		dbo.pro_singleProjectArrange
+		SET intermediaryId = #intermediary#
+		,projectTime = #datapreTime#
+		WHERE id = #id#
+	</update>
+	
+	 <update id="updatePackIntermediaryByLegalSectionChief" parameterClass="com.audit.entity.project.ArrangeProject">
+		UPDATE
+		dbo.pro_packProjectArrange
+		SET intermediaryId = #intermediary#
+		,projectTime = #datapreTime#
+		WHERE id = #id#
+	</update>
+
+	<update id="updateProjectNoArrangeState" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_datapreinfo
+		SET isArrangement = '0'
+		WHERE id = #id#
+	</update>
+	
+		<!-- 跟踪预审资料id查询单项目安排id -->
+	<select id="selectsingelBydatapreId" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.SingleProjectArrange">
+		select id from pro_singleProjectArrange where datapreId=#id#
+	</select>
+
+	<select id="getSingleProejctArrangeById" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.SingleProjectArrange">
+		SELECT
+		t1.id
+		,t1.areaLeaderAuditState
+		,t1.datapreId
+		,t1.governmentEmployeeAuditState
+		,t1.intermediaryAuditState
+		,SUBSTRING(CONVERT(varchar, t1.intermediaryAuditTime, 120),0,12) as
+		intermediaryAuditTime
+		,t1.intermediaryId
+		,SUBSTRING(CONVERT(varchar,
+		t1.intermediarySendTime, 120),0,12) as intermediarySendTime
+		,t1.legalAreaLeaderAuditState
+		,t1.legalSectionChiefAuditState
+		,t1.mainAuditId
+		,t1.mainAuditState
+		,t1.projectRemark
+		,SUBSTRING(CONVERT(varchar,t1.projectTime, 120),0,12) as projectTime
+		,t1.isMySelfState
+		,t1.state
+		,t2.projectName
+		,t2.sentAmount
+		,t3.ownerName
+		,t5.username as
+		mainAuditName,
+		t4.intermediaryname as intermediaryName,
+		t1.dataTransferTime
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid =
+		t3.id
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON t1.intermediaryId =
+		t4.id
+		LEFT JOIN
+		dbo.sys_userinfo t5
+		ON t1.mainAuditId = t5.id
+		WHERE t1.id
+		= #id#
+	</select>
+
+	<select id="getGovenmentEmployeeByProejctArrangeId"
+		parameterClass="java.lang.String" resultClass="com.audit.entity.project.Employee">
+		SELECT
+		t1.governmentEmployeeId as id, t2.username as userName FROM
+		dbo.pro_employeeArrangeRelate t1
+		LEFT JOIN dbo.sys_userinfo t2
+		ON
+		t1.governmentEmployeeId = t2.id
+		WHERE t1.projectArrangeId = #id#
+	</select>
+
+	<update id="updateSingleProjectArrange" parameterClass="com.audit.entity.project.SingleProjectArrange">
+		UPDATE
+		dbo.pro_singleProjectArrange
+		SET
+		id=#id#
+		<isNotEmpty property="projectTime">
+		,projectTime = #projectTime#
+		</isNotEmpty>
+		,projectRemark= #projectRemark#
+		,mainAuditId =#mainAuditId#
+		<isNotEmpty property="intermediarySendTime">
+		,intermediarySendTime = #intermediarySendTime#
+		</isNotEmpty>
+		,intermediaryId=#intermediaryId#
+		,state = #state#
+		<isNotEmpty property="intermediaryAuditTime">
+		,intermediaryAuditTime = #intermediaryAuditTime#
+		</isNotEmpty>
+		<isNotEmpty property="dataTransferTime">
+		,dataTransferTime = #dataTransferTime#
+		</isNotEmpty>
+		,userAccount = #userAccount#
+		WHERE id = #id#
+	</update>
+
+	<update id="deleteStateSingleProjectArrange" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_singleProjectArrange
+		SET
+		state = '2'
+		WHERE id = #id#
+	</update>
+
+	<select id="getProjectIdBySingleProjectArrangeId"
+		parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT datapreId FROM
+		dbo.pro_singleProjectArrange WHERE id = #id# 
+	</select>
+
+	<delete id="deleteSingleProjectArrange" parameterClass="java.lang.String">
+		DELETE
+		FROM dbo.pro_singleProjectArrange
+		WHERE id = #id#
+	</delete>
+
+	<delete id="deleteEmployeeArrangeRelete" parameterClass="com.audit.entity.project.EmployeeArrangeRelate">
+		DELETE
+		FROM dbo.pro_employeeArrangeRelate WHERE projectArrangeId =
+		#projectArrangeId# AND governmentEmployeeId = #governmentEmployeeId#
+	</delete>
+
+	<delete id="deleteEmployeeArrangeReleteByProjectArrangeId"
+		parameterClass="java.lang.String">
+		DELETE
+		FROM dbo.pro_employeeArrangeRelate WHERE
+		projectArrangeId =
+		#projectArrangeId#
+	</delete>
+
+	<select id="checkProjectIsAssign">
+		SELECT count(1) FROM dbo.pro_assignRelate WHERE
+		projectId = #projectId#
+	</select>
+
+	<select id="getProjectInfoByProjectId" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProjectInfo">
+		SELECT
+		t1.id,t1.projectName,t2.ownerName as
+		projectOwnerName, t1.sentAmount FROM
+		dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t2
+		ON t1.proownerid = t2.id
+		WHERE t1.id = #id#
+	</select>
+
+	<!--根据资料id查询项目安排 -->
+	<select id="selectsinglebydatapreId" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.SingleProjectInfo">
+		select id,datapreId,intermediaryId,mainAuditId from
+		pro_singleProjectArrange
+		where datapreId=#datapreId#
+	</select>
+
+	<!-- 查询打包项目的子项目总数 -->
+	<select id="getPackSubProjectAllCount" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		WHERE t1.id = #id#
+		AND
+		t3.state = '0'
+	</select>
+
+	<!-- 查询打包项目的子项目 -->
+	<select id="getPackSubProject" parameterClass="com.audit.entity.project.PackProjectArrange"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT id,projectName,ownerName,sentAmount,state,
+		SUBSTRING(CONVERT(varchar,datapreTime, 120),0,12) as datapreTime
+		FROM(SELECT top
+		$pagesize$
+		t3.id,t3.projectName,t4.ownerName,t3.sentAmount
+		,t3.state,t3.datapreTime
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON
+		t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		WHERE t1.id = #id#
+		AND
+		t3.state = '0'
+		) t WHERE (id not in (SELECT
+		TOP($pagesize$*($pageno$ -
+		1)) t1.id FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t2
+		ON
+		t1.id = t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		WHERE t1.id = #id#
+		AND
+		t3.state = '0'
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="getPackProjectMaxId" resultClass="java.lang.Integer">
+		SELECT
+		MAX(SUBSTRING
+		(id,4,len(id))) FROM dbo.pro_packProjectArrange
+	</select>
+
+	<insert id="addPackProjectArrange" parameterClass="com.audit.entity.project.PackProjectArrange">
+		INSERT INTO
+		dbo.pro_packProjectArrange
+		(id
+		,packageName
+		,projectTime
+		,projectRemark
+		,intermediaryId
+		,intermediaryAuditState
+		,governmentEmployeeAuditState
+		,sectionChiefAuditState
+		,areaLeaderAuditState
+		,mainAuditState
+		,mainAuditId
+		,intermediarySendTime
+		,isMySelfState
+		,state
+		,intermediaryAuditTime
+		,legalSectionChiefAuditState
+		,legalAreaLeaderAuditState
+		,userAccount
+		,sendAmount
+		,ownerId
+		,dataTransferTime)
+		VALUES
+		(#id#
+		,#projectPackName#
+		,#projectTime#
+		,#projectRemark#
+		,#intermediaryId#
+		,'0'
+		,'0'
+		,'0'
+		,'0'
+		,'0'
+		,#mainAuditId#
+		,#intermediarySendTime#
+		,#isMySelfState#
+		,'0'
+		,#intermediaryAuditTime#
+		,'0'
+		,'0'
+		,#userAccount#
+		,#sentAmount#
+		,#ownerId#
+		,#dataTransferTime#)
+	</insert>
+
+	<insert id="addPackProjectOfSubProject" parameterClass="com.audit.entity.project.PackProjectRelate">
+		INSERT
+		INTO dbo.pro_packProjectRelate
+		(
+		id
+		,projectPackId
+		,projectId)
+		VALUES(
+		#id#
+		,#projectPackId#
+		,#projectId#)
+	</insert>
+
+	<delete id="deletePackProjectOfSubProject" parameterClass="com.audit.entity.project.PackProjectRelate">
+		DELETE
+		FROM dbo.pro_packProjectRelate
+		WHERE projectPackId =
+		#projectPackId# AND projectId = #projectId#
+	</delete>
+
+	<select id="getPackOfAllSubProjectAmount" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT sum(convert(decimal(18,2),t2.sentAmount)) as
+		sentAmount FROM
+		dbo.pro_packProjectRelate t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.projectId = t2.id
+		WHERE t1.projectPackId =
+		#id#
+	</select>
+
+	<update id="updatePackProjectInfo" parameterClass="com.audit.entity.project.PackProjectArrange">
+		UPDATE
+		dbo.pro_packProjectArrange
+		SET
+		packageName = #projectPackName#
+		,projectTime =
+		#projectTime#
+		,projectRemark = #projectRemark#
+		,mainAuditId = #mainAuditId#
+		,intermediarySendTime =
+		#intermediarySendTime#
+		,intermediaryId=#intermediaryId#
+		,state = #state#
+		,intermediaryAuditTime =
+		#intermediaryAuditTime#
+		,sendAmount =
+		#sentAmount#
+		,ownerId = #ownerId#
+		,dataTransferTime = #dataTransferTime#
+		WHERE id = #id#
+	</update>
+
+	<select id="getPackProjectAuditState" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.PackProjectArrange">
+		SELECT
+		t1.id,t1.intermediaryAuditState,
+		t1.intermediaryId,
+		t1.mainAuditId,
+		t1.mainAuditState,
+		t1.governmentEmployeeAuditState
+		FROM
+		dbo.pro_packProjectArrange t1
+		WHERE id = #id#
+	</select>
+
+	<select id="getPackProjectAllSubProject" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT
+		t3.id,t3.projectName,SUBSTRING(CONVERT(varchar,t3.datapretime, 120),0,12) as datapretime
+		,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state
+		FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.pro_packProjectRelate
+		t2
+		ON t1.id =t2.projectPackId
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		WHERE t3.id is not null
+		AND t1.id=#id#
+	</select>
+
+	<select id="getAllArrangeProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM (
+		select
+		t1.id,t1.packageName as
+		projectName,SUBSTRING(CONVERT(varchar,t1.projectTime, 120),0,12) as
+		datapreTime,t1.sendAmount as
+		sentAmount,t4.ownerName, 1 as
+		isArrangement, t1.state,t1.userAccount
+		FROM
+		dbo.pro_packProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON
+		t1.id
+		=t2.projectPackId
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t1.ownerId =
+		t4.id
+		union
+		select
+		t3.id,t3.projectName,t3.datapretime as
+		datapreTime,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state,t1.userAccount
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t1.datapreId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		) t
+		WHERE id is not null
+		<isNotEmpty property="ownerName">
+			AND t.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND userAccount = #userAccount#
+		</isNotEmpty>
+	</select>
+
+	<select id="getAllArrangeProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+
+		SELECT top $pagesize$ ID,datapreno, projectName, datapreTime, sentAmount,
+		ownerName, isArrangement, state, userAccount FROM
+		(
+		select
+		t1.id,t3.datapreno,t3.projectName,SUBSTRING(CONVERT(varchar,t3.datapretime,
+		120),0,12) as
+		datapreTime,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state,t1.userAccount
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t1.datapreId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		union
+		select
+		t1.id,t3.datapreno,t1.packageName as
+		projectName,SUBSTRING(CONVERT(varchar,t1.projectTime, 120),0,12) as
+		datapreTime,t1.sendAmount as sentAmount,t4.ownerName, 1 as
+		isArrangement, t1.state,t1.userAccount
+		FROM dbo.pro_packProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id =t2.projectPackId
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t1.ownerId =
+		t4.id
+		) t
+		WHERE (id not in (
+		SELECT top ($pagesize$*($pageno$ -1)) ID FROM
+		(
+		select
+		t1.id,t3.datapreno,t3.projectName,SUBSTRING(CONVERT(varchar,t3.datapretime,
+		120),0,12) as
+		datapreTime,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state,t1.userAccount
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t1.datapreId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		union
+		select
+		t1.id,t3.datapreno,t1.packageName as
+		projectName,SUBSTRING(CONVERT(varchar,t1.projectTime, 120),0,12) as
+		datapreTime,t1.sendAmount as sentAmount,t4.ownerName, 1 as
+		isArrangement, t1.state,t1.userAccount
+		FROM dbo.pro_packProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id =t2.projectPackId
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t1.ownerId =
+		t4.id
+		) t
+		WHERE id is not null
+		<isNotEmpty property="ownerName">
+			AND ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND projectName like '%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND userAccount = #userAccount#
+		</isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		AND id is not null
+		<isNotEmpty property="ownerName">
+			AND ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND projectName like '%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND userAccount = #userAccount#
+		</isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="selectAllProjectCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1)
+		FROM (
+		select
+		t1.id,t1.packageName as
+		projectName,t1.projectTime as
+		datapreTime,t1.sendAmount as
+		sentAmount,t4.ownerName, 1 as
+		isArrangement, t1.state,t1.userAccount
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON
+		t1.id
+		=t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t1.ownerId =
+		t4.id
+		union
+		select
+		t3.id,t3.projectName,t3.datapretime as
+		datapreTime,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state,t1.userAccount
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t1.datapreId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		union
+		SELECT t1.id,t1.projectName,t1.datapretime as
+		datapreTime,t1.sentAmount,t3.ownerName,t1.isArrangement,t1.state,
+		t4.userAccount FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t1.proownerid = t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND t4.userAccount =
+		#userAccount#
+		)
+		t
+		WHERE id is not null
+		<isNotEmpty property="ownerName">
+			AND t.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND userAccount = #userAccount#
+		</isNotEmpty>
+	</select>
+
+	<select id="selectAllProject" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$
+		id,datapreno,projectName,sentAmount,ownerName,state as
+		dateState,SUBSTRING(CONVERT(varchar,
+		datapreTime, 120),0,12) as
+		datapreTime, isArrangement FROM
+		(
+		SELECT
+		id,datapreno,projectName,datapreTime,sentAmount,ownerName,isArrangement,state,userAccount
+		FROM (
+		select
+		t1.id,t3.datapreno,t1.packageName as
+		projectName,SUBSTRING(CONVERT(varchar,t1.projectTime, 120),0,12) as
+		datapreTime,t1.sendAmount as sentAmount,t4.ownerName, 1 as
+		isArrangement, t1.state,t1.userAccount
+		FROM dbo.pro_packProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id =t2.projectPackId
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t1.ownerId =
+		t4.id
+		union
+		select
+		t3.id,t3.datapreno,t3.projectName,t3.datapretime as
+		datapreTime,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state,t1.userAccount
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t1.datapreId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		union
+		SELECT t1.id,t1.datapreno,t1.projectName,t1.datapretime as
+		datapreTime,t1.sentAmount,t3.ownerName,t1.isArrangement,t1.state,
+		#userAccount# as userAccount FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t1.proownerid = t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND t4.userAccount =
+		#userAccount#
+		) t
+		WHERE id is not null
+		<isNotEmpty property="ownerName">
+			AND ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND projectName like '%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND userAccount = #userAccount#
+		</isNotEmpty>
+		) t5
+		WHERE (id not IN
+		(select TOP($pagesize$*($pageno$ -1)) id FROM
+		(SELECT
+		id,datapreno,packageName as
+		projectName,datapreTime,sendAmount,ownerName,isArrangement,state,userAccount
+		FROM (
+		select
+		t1.id,t3.datapreno,t1.packageName,t1.projectTime as
+		datapreTime,t1.sendAmount,t4.ownerName, 1 as
+		isArrangement,
+		t1.state,t1.userAccount
+		FROM dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON t1.id =t2.projectPackId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t1.ownerId =
+		t4.id
+		union
+		select
+		t3.id,t3.datapreno,t3.projectName,t3.datapretime as
+		datapreTime,t3.sentAmount,t4.ownerName,t3.isArrangement,t3.state,t1.userAccount
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON
+		t1.datapreId = t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid
+		= t4.id
+		union
+		SELECT t1.id,t1.datapreno,t1.projectName,t1.datapretime as
+		datapreTime,t1.sentAmount,t3.ownerName,t1.isArrangement,t1.state,
+		#userAccount# as userAccount FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t1.proownerid = t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND t4.userAccount =
+		#userAccount#
+		) ta
+		WHERE id is not null
+		<isNotEmpty property="ownerName">
+			AND ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="userAccount">
+			AND userAccount = #userAccount#
+		</isNotEmpty>
+		) t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="selectPackProjectInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.PackProjectArrange">
+		SELECT
+		t1.id,
+		t1.packageName as projectPackName,
+		t1.sendAmount as sentAmount,
+		SUBSTRING(CONVERT(varchar,t1.projectTime,
+		120),0,12) as projectTime,
+		t1.projectRemark,
+		t1.mainAuditId,
+		t1.mainAuditState as mainAuditState,
+		t1.ownerId as ownerId,
+		t2.ownerName as ownerName,
+		t1.intermediaryId,
+		t1.intermediaryAuditState
+		as intermediaryAuditState,
+		SUBSTRING(CONVERT(varchar,t1.intermediaryAuditTime, 120),0,12) as
+		intermediaryAuditTime,
+		SUBSTRING(CONVERT(varchar,t1.intermediarySendTime, 120),0,12) as
+		intermediarySendTime,
+		t3.intermediaryname
+		as intermediaryName,
+		t1.isMySelfState,
+		t1.state,
+		t4.username as mainAuditName,
+		t1.governmentEmployeeAuditState as
+		governmentEmployeeAuditState,
+		t1.dataTransferTime
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		LEFT JOIN
+		dbo.sys_intermediaryagency t3
+		ON
+		t1.intermediaryId = t3.id
+		LEFT JOIN
+		dbo.sys_userinfo t4
+		ON t1.mainAuditId
+		= t4.id
+		WHERE t1.id = #id#
+	</select>
+
+	<update id="updatePackProjectAmount" parameterClass="com.audit.entity.project.PackProjectArrange">
+		UPDATE
+		dbo.pro_packProjectArrange
+		SET
+		sendAmount =#sentAmount#
+		WHERE id = #id#
+	</update>
+
+	<update id="updatePackProjectState" parameterClass="com.audit.entity.project.PackProjectArrange">
+		UPDATE
+		dbo.pro_packProjectArrange
+		SET
+		state =#state#
+		WHERE id = #id#
+	</update>
+
+	<delete id="deletePackProject" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.pro_packProjectArrange
+		WHERE id = #id#
+	</delete>
+
+    <!-- 删除打包项目下的子项目 -->
+	<delete id="deleteSubPackProject" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.pro_packProjectRelate
+		WHERE projectPackId = #id#
+	</delete>
+
+	<!-- 判断是否存在政府雇员审核信息 -->
+	<select id="checkIsExistEmoloyeeAuditInfo" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_governmentEmployeeAudit t
+		LEFT JOIN dbo.pro_intermediaryaudit t1
+		ON t1.datapreId = t.datapreId
+		LEFT JOIN dbo.pro_sectionChiefAudit t2
+		ON t.projectId = t2.projectDateId
+		WHERE t.datapreId = #id#
+		AND t1.id is not null
+		AND t2.id is not null
+    </select>
+</sqlMap>
+

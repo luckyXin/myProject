@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="common">
+
+   <typeAlias alias="rumap" type="com.audit.entity.RoleUserMap"/>
+   <typeAlias alias="ru" type="com.audit.entity.RoleUser"/>
+    <!-- 分页查询用户角色数据 -->
+	  <select id="selectroleuserpage" parameterClass="rumap" resultClass="rumap">   
+	     select id,rolename,remark,state from sys_role where 1=1  and state=0
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  
+	   <!-- 查询角色总的条数 -->
+	  <select id="selecruallcount"  resultClass="java.lang.Integer">   
+	   select count(1) from sys_role where state=0
+	  </select> 
+	  <!-- 查询是否授予角色 -->
+	  <select id="selecrucount" parameterClass="ru"  resultClass="java.lang.Integer">   
+	   select count(1) from sys_roleuser where roleid=#roleid# and userid=#userid#
+	  </select> 
+	  
+	  
+	  
+   <!-- 分页查询当前用户拥有的角色 -->
+    <select id="selectuserhaverolepage" parameterClass="ru" resultClass="rumap">   
+	     select id,rolename,remark,state from sys_role where 1=1  and state=0  and id in(select roleid from sys_roleuser where userid=#userid#)
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  
+	   <select id="selectuserhaverolecount" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	     select count(1) from sys_role where 1=1  and state=0  and id in(select roleid from sys_roleuser where userid=#userid#)
+	  </select> 
+	  
+	   <!-- 分页查询当前用户没有拥有的角色 -->
+    <select id="selectusernohaverolepage" parameterClass="ru" resultClass="rumap">   
+	     select id,rolename,remark,state from sys_role where 1=1  and state=0  and id not in(select roleid from sys_roleuser where userid=#userid#)
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  
+	   <select id="selectusernohaverolecount" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	     select count(1) from sys_role where 1=1  and state=0  and id  not in(select roleid from sys_roleuser where userid=#userid#)
+	  </select> 
+   	  
+   	  <!-- 查询用户是否存在科长角色 -->
+	   <select id="selectuserroleiskezhang" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	       select COUNT(*) from sys_roleuser where userid=#id# and roleid='R011'
+	  </select> 
+	  
+	   <!-- 查询id最大值 -->
+	   <select id="selectuserandrolemaxid" resultClass="java.lang.Integer">   
+	    select max(id) from sys_roleuser
+	   </select> 
+	  <!-- 授予角色 -->
+	   <insert id="insertuserandrole"  parameterClass="ru">
+           insert into sys_roleuser(id,roleid,userid)
+           values
+           (#id#,#roleid#,#userid#)
+	 </insert>
+	  <!-- 取消角色 -->
+	  <delete id="deluserandrole" parameterClass="ru">
+	     delete from sys_roleuser where roleid=#roleid# and userid=#userid#
+	 </delete>
+</sqlMap>
+
