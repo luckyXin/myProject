@@ -1,47 +1,57 @@
 <%@ page language="java" contentType="text/html; charset=utf-8"
-    pageEncoding="utf-8"%>
+	pageEncoding="utf-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/center.css">
-<link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/head/head.css">
-<link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/icon.css">
-<link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/easyui/themes/default/easyui.css">
-<script type="text/javascript" src="<%=request.getContextPath() %>/js/JQuery.js"></script>
-<script type="text/javascript" src="<%=request.getContextPath() %>/js/dftree.js"></script>
-<script type="text/javascript" src="<%=request.getContextPath() %>/easyui/jquery.easyui.min.js"></script>
-<script type="text/javascript" src="<%=request.getContextPath() %>/easyui/locale/easyui-lang-zh_CN.js"></script>
-<script type="text/javascript" src="<%=request.getContextPath() %>/js/system/center.js"></script>
-<title>管理中心</title>
-<style type="text/css">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link rel="stylesheet" type="text/css"
+			href="<%=request.getContextPath()%>/css/center.css">
+		<link rel="stylesheet" type="text/css"
+			href="<%=request.getContextPath()%>/css/head/head.css">
+		<link rel="stylesheet" type="text/css"
+			href="<%=request.getContextPath()%>/css/icon.css">
+		<link rel="stylesheet" type="text/css"
+			href="<%=request.getContextPath()%>/easyui/themes/default/easyui.css">
+		<script type="text/javascript"
+			src="<%=request.getContextPath()%>/js/JQuery.js"></script>
+		<script type="text/javascript"
+			src="<%=request.getContextPath()%>/js/dftree.js"></script>
+		<script type="text/javascript"
+			src="<%=request.getContextPath()%>/easyui/jquery.easyui.min.js"></script>
+		<script type="text/javascript"
+			src="<%=request.getContextPath()%>/easyui/locale/easyui-lang-zh_CN.js"></script>
+		<script type="text/javascript"
+			src="<%=request.getContextPath()%>/js/system/center.js"></script>
+		<title>管理中心</title>
+		<style type="text/css">
 .menu_daohang {
 	text-align: center;
-	margin-top:1px;
+	margin-top: 1px;
 	float: left;
 	cursor: pointer;
 	margin-right: 3px;
 	height: 26px;
 	line-height: 26px;
-	min-width:100px;
+	min-width: 100px;
 	border: 0px;
-	padding-left:5px;
-	padding-right:5px;
+	padding-left: 5px;
+	padding-right: 5px;
 	background-image: url("/audita/css/head/images/q2.jpg");
 }
+
 .menu_daohangWork {
 	text-align: center;
-	margin-top:1px;
+	margin-top: 1px;
 	float: left;
 	cursor: pointer;
 	margin-right: 3px;
 	height: 26px;
 	line-height: 26px;
-	min-width:100px;
+	min-width: 100px;
 	border: 0px;
-	padding-left:5px;
-	padding-right:5px;
+	padding-left: 5px;
+	padding-right: 5px;
 	background-image: url("/audita/css/head/images/q2.jpg");
 }
 
@@ -52,12 +62,12 @@
 .menu_daohang:HOVER {
 	background-image: url("/audita/css/head/images/q1.jpg");
 }
-.root{
-   margin-left:-40px;
-}
 
+.root {
+	margin-left: -40px;
+}
 </style>
-<script type="text/javascript" >
+		<script type="text/javascript">
 	$(function() {
 		if(top.location.href!=self.location.href){
 			top.location.href = self.location.href;
@@ -132,45 +142,55 @@
 	});
 	document.onkeydown = banBackSpace;
 </script>
-<%
-response.setHeader("Pragma","No-cache");    
-response.setHeader("Cache-Control","no-cache");    
-response.setDateHeader("Expires", 0);
-%>
-</head>
-<body class="easyui-layout" style="background-color:#e0edfe">
- <input type="hidden" id="path" value="<%=request.getContextPath()%>">
-	<div region="north" border="false" class="background"
-		style="height: 120px;  overflow: hidden; background-color:#e0edfe;">
-		<div id="head_bg">
-			<div class="logo"
-				style="width: 100%; height: 99px; background-image: url('/audita/css/head/images/logo_bg.jpg'); background-repeat: no-repeat; background-position: right bottom;">
-				<img src="<%=request.getContextPath()%>/css/head/images/logo_bg.jpg"
-					style="width: 100%;" height="90" />
+		<%
+			response.setHeader("Pragma", "No-cache");
+			response.setHeader("Cache-Control", "no-cache");
+			response.setDateHeader("Expires", 0);
+		%>
+	</head>
+	<body class="easyui-layout" style="background-color: #e0edfe">
+		<input type="hidden" id="path" value="<%=request.getContextPath()%>">
+		<div region="north" border="false" class="background"
+			style="height: 120px; overflow: hidden; background-color: #e0edfe;">
+			<div id="head_bg">
+				<div class="logo"
+					style="width: 100%; height: 99px; background-image: url('/audita/css/head/images/logo_bg.jpg'); background-repeat: no-repeat; background-position: right bottom;">
+					<img
+						src="<%=request.getContextPath()%>/css/head/images/logo_bg.jpg"
+						style="width: 100%;" height="90" />
+				</div>
 			</div>
-		</div>
-		<div id="menu" >
-			<div class="left" style="padding-left: 2px;">
-			  <c:forEach items="${topMenus}" var="menu">
-				 <div style="margin-top: 2px;" class="menu_daohang" code="${menu.id}">${menu.menuName}</div>
-			  </c:forEach>
-			   <div style="margin-top: 2px;" class="menu_daohangWork" id="myworkButton">我的工作</div>
-			</div>
-			<div class="right">
-				<input class="menu_button01" name="" type="button"
-					onclick="javascript:location.href='logout.do'" />
-			</div>
-			<div class="left right" >
-				<div class="menu_txt" style="width: 120px;"margin-left: 20px;" id="time_1"></div>
-			</div>
-			<div class="left right>
-				<div ><img src="<%=request.getContextPath() %>/css/head/images/ico_01.jpg" />用户名：${sessionScope.user.username}
+			<div id="menu">
+				<div class="left" style="padding-left: 2px;">
+					<c:forEach items="${topMenus}" var="menu">
+						<div style="margin-top: 2px;" class="menu_daohang"
+							code="${menu.id}">
+							${menu.menuName}
+						</div>
+					</c:forEach>
+					<div style="margin-top: 2px;" class="menu_daohangWork"
+						id="myworkButton">
+						我的工作
+					</div>
+				</div>
+				<div class="right">
+					<input class="menu_button01" name="" type="button"
+						onclick="javascript:location.href='logout.do'" />
+				</div>
+				<div class="left right">
+					<div class="menu_txt" style="width: 120px;"
+						margin-left: 20px;" id="time_1"></div>
+				</div>
+				<div
+					class="left right>
+				<div ><img src="<%=request.getContextPath()%>/css/head/images/ico_01.jpg" />用户名：${sessionScope.user.username}
 				&nbsp;
 				<a href="javascript:void(0);"  onclick="jieshounoread();">消息(<font color="red"><span id="newmessage">0</span></font>)条</a>
-				  <img  id="vs_ico" src="<%=request.getContextPath() %>/images/icon/TreeView/useropen.gif" />
+				  <img  id="vs_ico" src="<%=request.getContextPath()%>/images/icon/TreeView/useropen.gif" />
 				</div>
 			</div>
 		</div>
+		
 	</div>
 	<div region="south" border="true" style="height: 25px; 
 	text-align: center; font-size: 12px; padding-top: 3px" class="background">
@@ -183,7 +203,7 @@ response.setDateHeader("Expires", 0);
 	<div region="center" class="background" style="padding: 5px; ">
 		<div id="workbench" class="easyui-tabs" fit=true>
 			<div title="我的工作" style="overflow: hidden;" closable='true'>
-					    <iframe id="mywork" name="mywork" src="<%=request.getContextPath() %>/work/MyWork/input.do" style="width:100%;height:100%;border-style: none;" 
+					    <iframe id="mywork" name="mywork" src="<%=request.getContextPath()%>/work/MyWork/input.do" style="width:100%;height:100%;border-style: none;" 
 					    frameborder="no" border="0" marginwidth="0" marginheight="0" allowtransparency="yes" ></iframe>
 			</div>
 		</div>
