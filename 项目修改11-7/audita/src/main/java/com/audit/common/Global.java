@@ -11,7 +11,7 @@ import com.audit.entity.Function;
  * @return
  */
 public class Global {
-   
+
 	public static List<Function> FunctionList = null;
 
 	public static boolean FunctionListEquals(String url) {
