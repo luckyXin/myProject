@@ -24,7 +24,6 @@ import com.audit.exception.AuditException;
 import com.audit.service.common.ICompetenceService;
 import com.audit.service.project.IAreaLeaderAuditService;
 import com.audit.service.project.IIntermediaryAuditService;
-
 /**
  * @author DengXin
  */
