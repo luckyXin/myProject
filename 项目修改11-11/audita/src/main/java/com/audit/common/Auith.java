@@ -12,7 +12,6 @@ public class Auith {
 		;
 	}
 
-	/** */
 	/**
 	 * 提供精确的加法运算。
 	 * 
@@ -28,7 +27,6 @@ public class Auith {
 		return b1.add(b2).doubleValue();
 	}
 
-	/** */
 	/**
 	 * 提供精确的减法运算。
 	 * 
@@ -44,7 +42,6 @@ public class Auith {
 		return b1.subtract(b2).doubleValue();
 	}
 
-	/** */
 	/**
 	 * 提供精确的乘法运算。
 	 * 
@@ -60,7 +57,6 @@ public class Auith {
 		return b1.multiply(b2).doubleValue();
 	}
 
-	/** */
 	/**
 	 * 提供（相对）精确的除法运算，当发生除不尽的情况时，精确到 小数点以后10位，以后的数字四舍五入。
 	 * 
@@ -74,7 +70,6 @@ public class Auith {
 		return div(v1, v2, DEF_DIV_SCALE);
 	}
 
-	/** */
 	/**
 	 * 提供（相对）精确的除法运算。当发生除不尽的情况时，由scale参数指 定精度，以后的数字四舍五入。
 	 * 
