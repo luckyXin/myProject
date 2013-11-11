@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system
+END
+IDictionaryService.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IDictionaryService.java
+END
+IUserInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IUserInfoService.java
+END
+INoticeInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/INoticeInfoService.java
+END
+IRoleInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IRoleInfoService.java
+END
+IMenuInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IMenuInfoService.java
+END
+IMessageInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IMessageInfoService.java
+END
+IFunctionInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IFunctionInfoService.java
+END
+IModuleInfoService.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IModuleInfoService.java
+END
+IDepartmentService.java
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/java/com/audit/service/system/IDepartmentService.java
+END

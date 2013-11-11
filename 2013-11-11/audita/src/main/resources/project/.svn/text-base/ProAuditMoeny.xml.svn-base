@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ProAuditMoenyxml">
+   <typeAlias alias="ProAuditMoeny" type="com.audit.entity.project.ProAuditMoeny"/>
+    <typeAlias alias="ResultClassProAuditMoney" type="com.audit.entity.project.ResultClassProAuditMoney"/>
+    
+	  <!-- 分页查询审计费用数据 -->
+	  <select id="selectproauditmoneypage" parameterClass="ResultClassProAuditMoney" resultClass="ResultClassProAuditMoney">   
+	    
+	    select auditProjectName,baseauditmoney,xiaoyiauditmoney from 
+	    (
+	    select d.projectName as auditProjectName ,a.basemoney as baseauditmoney,a.xiaoyimoney as xiaoyiauditmoney from pro_datapreinfo d inner join pro_auditmoeny a
+        on d.id=a.datapreId ) t where 1=1
+	    <dynamic prepend="and">
+             <isNotEmpty property="auditProjectName">
+                       auditProjectName like '%$auditProjectName$%'
+             </isNotEmpty>
+         </dynamic>
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  <!-- 查询审计费用记录条数 -->
+	   <select id="selectproauditmoneycount" parameterClass="ResultClassProAuditMoney" resultClass="java.lang.Integer">   
+		   select count(1) from
+		   (
+		    select d.projectName as auditProjectName ,a.basemoney as baseauditmoney,a.xiaoyimoney as xiaoyiauditmoney from pro_datapreinfo d inner join pro_auditmoeny a
+            on d.id=a.datapreId
+           ) t where 1=1
+	    <dynamic prepend="and">
+             <isNotEmpty property="auditProjectName">
+                       auditProjectName like '%$auditProjectName$%'
+             </isNotEmpty>
+         </dynamic>
+	  </select>  
+   
+   
+   
+   <!-- 查询该项目费用对象 -->
+  	  <select id="getProAuditMoeny" parameterClass="java.lang.String" resultClass="ProAuditMoeny">     
+	  select id,datapreId,basemoney,xiaoyimoney from pro_auditmoeny  where datapreId=#datapreId# 
+	  </select>
+    <!-- 增加费用 -->
+	<insert id="addProAuditMoeny"  parameterClass="ProAuditMoeny">
+           insert into pro_auditmoeny
+           (id,datapreId,basemoney,xiaoyimoney)
+           values
+           (#id#,#datapreId#,#basemoney#,#xiaoyimoney#)	  
+	  </insert>
+    <!-- 修改费用 -->
+    <update id="updateProAuditMoeny"  parameterClass="ProAuditMoeny">
+       update pro_auditmoeny set
+       basemoney=#basemoney#,
+       xiaoyimoney=#xiaoyimoney#
+       where datapreId=#datapreId#      
+    </update>
+</sqlMap>
+

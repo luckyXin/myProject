@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="tractpolicychange">
+	  <select id="selectallzhengcepage" parameterClass="com.audit.entity.project.TractPolicyChange" resultClass="com.audit.entity.project.TractPolicyChange">
+	     select * from pro_tractPolicyChange where 1=1
+	     and biaoDuanId=#biaoDuanId#
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  
+	  </select>
+	  <!--
+	   查询政策性总的记录条数 
+	  -->
+	  <select id="selectallzhengcecount" parameterClass="com.audit.entity.project.TractPolicyChange" resultClass="java.lang.Integer">   
+	    select count(1) from pro_tractPolicyChange where 1=1
+	     and biaoDuanId=#biaoDuanId#
+	  </select>
+	  
+	  
+	  
+	  <select id="selectrengongtzinfo" parameterClass="com.audit.entity.project.ProTractAdjustment" resultClass="com.audit.entity.project.ProTractAdjustment">
+	     select * from pro_tractAdjustment where 1=1
+	     and policyChangeId=#policyChangeId#
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  
+	  </select>
+	  <!--
+	   查询人工调整费用记录条数 
+	  -->
+	  <select id="selectrengongtzinfocount" parameterClass="com.audit.entity.project.ProTractAdjustment" resultClass="java.lang.Integer">   
+	    select count(1) from pro_tractAdjustment where 1=1
+	     and policyChangeId=#policyChangeId#
+	  </select>
+	  
+	  <!--  增加政策性信息 -->
+	 <insert id="addzhengce"  parameterClass="com.audit.entity.project.TractPolicyChange">
+	   insert into pro_tractPolicyChange(id,biaoDuanId,artificialfile,otherContext,createUserAccount,createTime,remark,datamoney,machinemoney) values
+	    (#id#,#biaoDuanId#,#artificialfile#,#otherContext#,#createUserAccount#,#createTime#,#remark#,#datamoney#,#machinemoney#)
+	</insert>
+	
+	 <!-- 修改政策性信息 -->
+	<update id="updatezhengce" parameterClass="com.audit.entity.project.TractPolicyChange">
+	   update  pro_tractPolicyChange
+	   set
+	   artificialfile=#artificialfile#,
+	   otherContext=#otherContext#,
+	   createUserAccount=#createUserAccount#,
+	   createTime=#createTime#,
+	   remark=#remark#,
+	   datamoney=#datamoney#,
+	   machinemoney=#machinemoney#
+	   where id=#id#
+	</update>
+	
+
+	<!--  根据标段id查询政策性信息对象  -->
+	<select id="selectzhengcebybdid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.TractPolicyChange">
+	select * from pro_tractPolicyChange  where biaoDuanId=#id#
+	</select>
+	
+	<!-- 根据id查询政策性对象 -->
+	<select id="selectzhengcebyid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.TractPolicyChange">
+	select * from pro_tractPolicyChange  where id=#id#
+	</select>
+	
+	<!-- 根据id查询人工费用对象 -->
+	<select id="selectrengongbyid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ProTractAdjustment">
+	select * from pro_tractAdjustment  where id=#id#
+	</select>
+	
+	 <!--  增加人工费用对象-->
+	 <insert id="addrengongmoney"  parameterClass="com.audit.entity.project.ProTractAdjustment">
+	   insert into pro_tractAdjustment(id,adjustmentwh,delabourmoney,tzlv,mantzmoney,tztime,policyChangeId) values
+	    (#id#,#adjustmentwh#,#delabourmoney#,#tzlv#,#mantzmoney#,#tztime#,#policyChangeId#)
+	</insert>
+	
+	 <!-- 修改人工费用对象 -->
+	<update id="updaterengongmoney" parameterClass="com.audit.entity.project.ProTractAdjustment">
+	    update  pro_tractAdjustment
+	    set
+	    adjustmentwh=#adjustmentwh#,
+	    delabourmoney=#delabourmoney#,
+	    tzlv=#tzlv#,
+	    mantzmoney=#mantzmoney#,
+	    tztime=#tztime#,
+	    policyChangeId=#policyChangeId#
+	    where id=#id#
+	</update>
+	
+	<delete id="delrengongmoney" parameterClass="java.lang.String">
+	   delete from pro_tractAdjustment where id=#id#
+	</delete>
+	
+	
+	<!-- 查询总的人工费用调整 -->
+	 <select id="selecttotalrengongmoney" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ProTractAdjustment">
+	     select SUM(convert(decimal(18,2),mantzmoney))as mantzmoney from pro_tractAdjustment where 1=1
+	     and policyChangeId=#id#
+	  </select>
+	
+	<!-- 根据id查询政策性 -->
+	<delete id="delzhengce" parameterClass="java.lang.String">
+	   delete from pro_tractPolicyChange where id=#id#
+	</delete>
+</sqlMap>

@@ -1,0 +1,955 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="tractProjectMonthReport">
+
+     <!--查询模板文件  -->
+    <select id="findMonthFileInfopage" parameterClass="com.audit.entity.project.ProTractMonthFileInfo" resultClass="com.audit.entity.project.ProTractMonthFileInfo">
+         select * from pro_tractMonthFileInfo where biaoDuanId=#biaoDuanId#
+          <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+       
+    </select>
+    <select id="findMonthFileInfocount" parameterClass="com.audit.entity.project.ProTractMonthFileInfo" resultClass="java.lang.Integer">
+     select count(*) from pro_tractMonthFileInfo where biaoDuanId=#biaoDuanId#
+    
+    </select>
+   
+
+    <!-- 插入文件模板信息 -->
+    <insert id="addTractMonthFile" parameterClass="com.audit.entity.project.ProTractMonthFileInfo">
+       INSERT INTO
+		pro_tractMonthFileInfo
+		(id
+		,biaoDuanId
+		,filename
+		,fileurl
+		,createuser
+		,createtime
+		)
+		VALUES
+		(#id#
+		,#biaoDuanId#
+		,#filename#
+		,#fileurl#
+		,#createuser#
+		,#createtime#
+		)
+    
+    </insert>
+
+
+    <!-- 查询模板对象 -->
+      <select id="selectMonthFileObject" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ProTractMonthFileInfo">
+     select * from pro_tractMonthFileInfo where id=#id#
+    
+    </select>
+    
+    <!-- 删除模板文件对象 -->
+    <delete id="delMonthtempfile" parameterClass="java.lang.String">
+       delete from pro_tractMonthFileInfo where id=#id#
+    </delete>
+
+	<!-- 插入月报数据 -->
+	<insert id="insertTractMonthReport" parameterClass="com.audit.entity.project.TractMonthReportInfo">
+		INSERT INTO
+		dbo.pro_tractMonthContent
+		(id
+		,biaoDuanId
+		,createTime
+		,nowMonthCompleteValue
+		,totalCompleteValue
+		,nowMonthPayValue
+		,createUserAccount
+		,updateUserAccount
+		,updateTime
+		,addPayProjectMoney
+		,projectImagePlan
+		,existProblem
+		)
+		VALUES
+		(#id#
+		,#biaoDuanId#
+		,#createTime#
+		,#nowMonthCompleteValue#
+		,#totalCompleteValue#
+		,#nowMonthPayValue#
+		,#createUserAccount#
+		,#createUserAccount#
+		,getDate()
+		,#addPayProjectMoney#
+		,#projectImagePlan#
+		,#existProblem#
+		)
+	</insert>
+
+	<select id="findProejctMonthReportInfoCount" parameterClass="com.audit.entity.project.TractMonthReportInfo"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM dbo.pro_tractMonthContent WHERE
+		biaoDuanId = #biaoDuanId#
+	</select>
+
+	<select id="findProejctMonthReportInfo" parameterClass="com.audit.entity.project.TractMonthReportInfo"
+		resultClass="com.audit.entity.project.TractMonthReportInfo">
+		SELECT TOP $pagesize$
+		id
+		,createTime
+		,nowMonthCompleteValue
+		,totalCompleteValue
+		,nowMonthPayValue
+		,createUserAccount
+		,updateUserAccount
+		,updateTime
+		FROM dbo.pro_tractMonthContent
+		WHERE
+		biaoDuanId = #biaoDuanId#
+		AND id not in (
+		SELECT
+		TOP($pagesize$*($pageno$ - 1))
+		id
+		FROM dbo.pro_tractMonthContent
+		WHERE
+		biaoDuanId = #biaoDuanId#
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by createTime desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by createTime desc
+	    </isEmpty>
+	</select>
+
+	<!-- 月报附件总数查询 -->
+	<select id="findMonthReportFileCount" parameterClass="com.audit.entity.project.FileBelongRelate"
+		resultClass="java.lang.Integer">
+		select count(*) from dbo.pro_tractMonthReportFile where
+		belongToId=#belongToId#
+	</select>
+
+	<!-- 月报附件信息查询 -->
+	<select id="findMonthReportFile" parameterClass="com.audit.entity.project.FileBelongRelate"
+		resultClass="com.audit.entity.project.FileBelongRelate">
+		select * from dbo.pro_tractMonthReportFile where
+		belongToId=#belongToId#
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 获取月报信息 -->
+	<select id="getTractMonthReportInfoById" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.TractMonthReportInfo">
+		SELECT id
+		,createTime
+		,nowMonthCompleteValue
+		,totalCompleteValue
+		,nowMonthPayValue
+		,createUserAccount
+		,updateUserAccount
+		,updateTime
+		,addPayProjectMoney
+		,projectImagePlan
+		,existProblem
+		FROM dbo.pro_tractMonthContent
+		WHERE id =
+		#id#
+	</select>
+
+	<!-- 删除月报附件 -->
+	<delete id="deleteMonthFile" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.pro_tractMonthReportFile WHERE id = #id#
+    </delete>
+
+	<!-- 获取月报文件 -->
+	<select id="getMonthFile" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.FileBelongRelate">
+		SELECT
+		id
+		,belongToId
+		,url
+		,fileName
+		,uploadTime
+		FROM
+		dbo.pro_tractMonthReportFile
+		WHERE id = #id#
+    </select>
+
+	<!-- 更新月报信息 -->
+	<update id="updateTractMonthReport" parameterClass="com.audit.entity.project.TractMonthReportInfo">
+		UPDATE
+		dbo.pro_tractMonthContent
+		SET
+		nowMonthCompleteValue =
+		#nowMonthCompleteValue#
+		,totalCompleteValue = #totalCompleteValue#
+		,nowMonthPayValue = #nowMonthPayValue#
+		,updateUserAccount =
+		#updateUserAccount#
+		,updateTime = getDate()
+		,addPayProjectMoney=#addPayProjectMoney#
+		,projectImagePlan=#projectImagePlan#
+		,existProblem=#existProblem#
+		WHERE id = #id#
+	</update>
+
+	<!-- 删除月报信息 -->
+	<update id="deleteTractMonthReport" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.pro_tractMonthContent WHERE id = #id#
+	</update>
+
+	<!-- 查询可以录月报的项目总数 -->
+	<select id="getProjectCanInputMonthReportCount" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM (
+		SELECT distinct
+		t1.id,t1.projectName,t6.ownerName FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.pro_employeeArrangeRelate t4
+		ON t3.id = t4.projectArrangeId
+		LEFT
+		JOIN dbo.sys_userinfo t5
+		ON t4.governmentEmployeeId = t5.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND
+		t5.userAccount = #userAccount#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+			</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+			</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 查询可以录月报的项目总数 -->
+	<select id="getProjectCanInputMonthReportCounts" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM (
+		SELECT distinct
+		t1.id,t1.projectName,t6.ownerName FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+			</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+			</isNotEmpty>
+		) t
+	</select>
+
+	<!-- 查询可以录月报的项目 -->
+	<select id="getProjectCanInputMonthReport" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT TOP $pagesize$ id,projectName,ownerName FROM
+		(
+		SELECT distinct
+		t1.id,t1.projectName,t6.ownerName FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON
+		t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON
+		t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.pro_employeeArrangeRelate t4
+		ON t3.id
+		= t4.projectArrangeId
+		LEFT
+		JOIN dbo.sys_userinfo t5
+		ON
+		t4.governmentEmployeeId = t5.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON
+		t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND
+		t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND
+		t5.userAccount =
+		#userAccount#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+			</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP($pagesize$*($pageno$ - 1)) id FROM (
+		SELECT distinct
+		t1.id FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.pro_employeeArrangeRelate t4
+		ON t3.id = t4.projectArrangeId
+		LEFT
+		JOIN dbo.sys_userinfo t5
+		ON t4.governmentEmployeeId = t5.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND t5.userAccount = #userAccount#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+				</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+			</isNotEmpty>
+		) a
+		)
+	</select>
+	
+	
+	
+	<!-- 查询可以录月报的项目 -->
+	<select id="getProjectCanInputMonthReports" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT TOP $pagesize$ id,projectName,ownerName FROM
+		(
+		SELECT distinct
+		t1.id,t1.projectName,t6.ownerName FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON
+		t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON
+		t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON
+		t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND
+		t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+			</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP($pagesize$*($pageno$ - 1)) id FROM (
+		SELECT distinct
+		t1.id FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+				</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+			</isNotEmpty>
+		) a
+		)
+	</select>
+
+    <!-- 指定项目下能够入月报的标段 -->
+	<select id="findCanInputMonthReportAllBiaoDuanById"
+		parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo" resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT
+        t2.id,
+		t2.projectId as _parentId,
+		t2.biaoDuanName,
+		t2.projectGaiKuang,
+		t2.supervisorUtil,
+		t2.buildManageUtil,
+		t2.prospectUtil,
+		t2.buildUtil,
+		t2.designUtil,
+		t2.constructUtil,
+		t2.preAuditMoney,
+		t2.zhongBiaoMoney,
+		t2.reallyStartTime,
+		t2.buildContent,
+		t2.isArrange,
+		t1.projectName,
+		t6.ownerName,
+		t3.isPay,
+		t2.dataTransferState
+        FROM
+		dbo.pro_tractProjectAudit t1 
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.pro_employeeArrangeRelate t4
+		ON t3.id = t4.projectArrangeId
+		LEFT
+		JOIN dbo.sys_userinfo t5
+		ON t4.governmentEmployeeId = t5.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND
+		t5.userAccount = #userAccount#
+		AND t2.projectId = #projectId#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+	</select>
+	
+	
+	
+	 <!-- 指定项目下能够入月报的标段 -->
+	<select id="findCanInputMonthReportAllBiaoDuanByIds"
+		parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo" resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT
+        t2.id,
+		t2.projectId as _parentId,
+		t2.biaoDuanName,
+		t2.projectGaiKuang,
+		t2.supervisorUtil,
+		t2.buildManageUtil,
+		t2.prospectUtil,
+		t2.buildUtil,
+		t2.designUtil,
+		t2.constructUtil,
+		t2.preAuditMoney,
+		t2.zhongBiaoMoney,
+		t2.reallyStartTime,
+		t2.buildContent,
+		t2.isArrange,
+		t1.projectName,
+		t6.ownerName,
+		t3.isPay,
+		t2.dataTransferState
+        FROM
+		dbo.pro_tractProjectAudit t1 
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND t2.projectId = #projectId#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+	</select>
+	
+	<!-- 能够入月报的标段总数 -->
+	<select id="findTractProjectCanInputMonthReportBiaoDuanAllCount" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM (
+			SELECT
+			distinct
+	        t2.id,
+			t2.projectId as _parentId,
+			t2.biaoDuanName,
+			t2.projectGaiKuang,
+			t2.supervisorUtil,
+			t2.buildManageUtil,
+			t2.prospectUtil,
+			t2.buildUtil,
+			t2.designUtil,
+			t2.constructUtil,
+			t2.preAuditMoney,
+			t2.zhongBiaoMoney,
+			t2.reallyStartTime,
+			t2.buildContent,
+			t2.isArrange,
+			t1.projectName,
+			t6.ownerName,
+			t3.isPay
+	        FROM
+			dbo.pro_tractProjectAudit t1 
+			LEFT JOIN
+			dbo.pro_tractBiaoDuanCreate t2
+			ON t1.id = t2.projectId
+			LEFT
+			JOIN dbo.pro_tractProjectArrange t3
+			ON t3.biaoDuanId = t2.id
+			LEFT JOIN
+			dbo.pro_employeeArrangeRelate t4
+			ON t3.id = t4.projectArrangeId
+			LEFT
+			JOIN dbo.sys_userinfo t5
+			ON t4.governmentEmployeeId = t5.id
+			LEFT JOIN
+			dbo.sys_projectowner t6
+			ON t1.ownerId = t6.id
+			WHERE
+			((t1.projectType in
+			('0','2')
+			AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+			AND
+			t5.userAccount = #userAccount#
+			AND t2.projectId = #projectId#
+			<isNotEmpty property="projectName">
+				AND t1.projectName like
+				'%$projectName$%'
+			</isNotEmpty>
+			<isNotEmpty property="ownerName">
+				AND t1.ownerId = #ownerName#
+			</isNotEmpty>
+		) t
+	</select>
+	
+	
+	<!--  -->
+	<select id="findTractProjectCanInputMonthReportBiaoDuanAllCounts" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM (
+			SELECT
+			distinct
+	        t2.id,
+			t2.projectId as _parentId,
+			t2.biaoDuanName,
+			t2.projectGaiKuang,
+			t2.supervisorUtil,
+			t2.buildManageUtil,
+			t2.prospectUtil,
+			t2.buildUtil,
+			t2.designUtil,
+			t2.constructUtil,
+			t2.preAuditMoney,
+			t2.zhongBiaoMoney,
+			t2.reallyStartTime,
+			t2.buildContent,
+			t2.isArrange,
+			t1.projectName,
+			t6.ownerName,
+			t3.isPay
+	        FROM
+			dbo.pro_tractProjectAudit t1 
+			LEFT JOIN
+			dbo.pro_tractBiaoDuanCreate t2
+			ON t1.id = t2.projectId
+			LEFT
+			JOIN dbo.pro_tractProjectArrange t3
+			ON t3.biaoDuanId = t2.id
+			LEFT JOIN
+			dbo.sys_projectowner t6
+			ON t1.ownerId = t6.id
+			WHERE
+			((t1.projectType in
+			('0','2')
+			AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+			AND t2.projectId = #projectId#
+			<isNotEmpty property="projectName">
+				AND t1.projectName like
+				'%$projectName$%'
+			</isNotEmpty>
+			<isNotEmpty property="ownerName">
+				AND t1.ownerId = #ownerName#
+			</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 能够入月报的标段信息 -->
+	<select id="findTractProjectCanInputMonthReportBiaoDuanAll" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+			resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT TOP $pagesize$
+		id
+		,_parentId
+		,biaoDuanName
+		,projectGaiKuang
+		,supervisorUtil
+		,buildManageUtil
+		,prospectUtil
+		,buildUtil
+		,designUtil
+		,constructUtil
+		,preAuditMoney
+		,zhongBiaoMoney
+		,reallyStartTime
+		,buildContent
+		,isArrange
+		,projectName
+		,ownerName
+		,isPay
+		,dataTransferState
+		FROM (
+		SELECT
+		distinct
+		t2.id,
+		t2.projectId as _parentId,
+		t2.biaoDuanName,
+		t2.projectGaiKuang,
+		t2.supervisorUtil,
+		t2.buildManageUtil,
+		t2.prospectUtil,
+		t2.buildUtil,
+		t2.designUtil,
+		t2.constructUtil,
+		t2.preAuditMoney,
+		t2.zhongBiaoMoney,
+		t2.reallyStartTime,
+		t2.buildContent,
+		t2.isArrange,
+		t1.projectName,
+		t6.ownerName,
+		t3.isPay,
+		t2.dataTransferState
+		FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.pro_employeeArrangeRelate t4
+		ON t3.id = t4.projectArrangeId
+		LEFT
+		JOIN dbo.sys_userinfo t5
+		ON t4.governmentEmployeeId = t5.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND
+		t5.userAccount = #userAccount#
+		AND t2.projectId = #projectId#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+				</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+				</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP($pagesize$*($pageno$ - 1)) id
+		FROM (
+		SELECT
+		distinct
+		t2.id,
+		t2.projectId as _parentId,
+		t2.biaoDuanName,
+		t2.projectGaiKuang,
+		t2.supervisorUtil,
+		t2.buildManageUtil,
+		t2.prospectUtil,
+		t2.buildUtil,
+		t2.designUtil,
+		t2.constructUtil,
+		t2.preAuditMoney,
+		t2.zhongBiaoMoney,
+		t2.reallyStartTime,
+		t2.buildContent,
+		t2.isArrange,
+		t1.projectName,
+		t6.ownerName,
+		t3.isPay,
+		t2.dataTransferState
+		FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.pro_employeeArrangeRelate t4
+		ON t3.id = t4.projectArrangeId
+		LEFT
+		JOIN dbo.sys_userinfo t5
+		ON t4.governmentEmployeeId = t5.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND
+		t5.userAccount = #userAccount#
+		AND t2.projectId = #projectId#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+				</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+				</isNotEmpty>
+		) t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t.id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t.id desc
+	    </isEmpty>
+	</select>
+
+	
+	
+	
+	<!-- 能够入月报的标段信息 -->
+	<select id="findTractProjectCanInputMonthReportBiaoDuanAlls" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+			resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT TOP $pagesize$
+		id
+		,_parentId
+		,biaoDuanName
+		,projectGaiKuang
+		,supervisorUtil
+		,buildManageUtil
+		,prospectUtil
+		,buildUtil
+		,designUtil
+		,constructUtil
+		,preAuditMoney
+		,zhongBiaoMoney
+		,reallyStartTime
+		,buildContent
+		,isArrange
+		,projectName
+		,ownerName
+		,isPay
+		,dataTransferState
+		FROM (
+		SELECT
+		distinct
+		t2.id,
+		t2.projectId as _parentId,
+		t2.biaoDuanName,
+		t2.projectGaiKuang,
+		t2.supervisorUtil,
+		t2.buildManageUtil,
+		t2.prospectUtil,
+		t2.buildUtil,
+		t2.designUtil,
+		t2.constructUtil,
+		t2.preAuditMoney,
+		t2.zhongBiaoMoney,
+		t2.reallyStartTime,
+		t2.buildContent,
+		t2.isArrange,
+		t1.projectName,
+		t6.ownerName,
+		t3.isPay,
+		t2.dataTransferState
+		FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND t2.projectId = #projectId#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+				</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+				</isNotEmpty>
+		) t
+		WHERE id not in (
+		SELECT TOP($pagesize$*($pageno$ - 1)) id
+		FROM (
+		SELECT
+		distinct
+		t2.id,
+		t2.projectId as _parentId,
+		t2.biaoDuanName,
+		t2.projectGaiKuang,
+		t2.supervisorUtil,
+		t2.buildManageUtil,
+		t2.prospectUtil,
+		t2.buildUtil,
+		t2.designUtil,
+		t2.constructUtil,
+		t2.preAuditMoney,
+		t2.zhongBiaoMoney,
+		t2.reallyStartTime,
+		t2.buildContent,
+		t2.isArrange,
+		t1.projectName,
+		t6.ownerName,
+		t3.isPay,
+		t2.dataTransferState
+		FROM
+		dbo.pro_tractProjectAudit t1
+		LEFT JOIN
+		dbo.pro_tractBiaoDuanCreate t2
+		ON t1.id = t2.projectId
+		LEFT
+		JOIN dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t6
+		ON t1.ownerId = t6.id
+		WHERE
+		((t1.projectType in
+		('0','2')
+		AND t2.qingBiaoState = '1') OR (t1.projectType = '1'))
+		AND t2.projectId = #projectId#
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+				</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+				</isNotEmpty>
+		) t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t.id desc
+	    </isEmpty>
+		)
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by t.id desc
+	    </isEmpty>
+	</select>
+
+	
+	<!-- 获取当前累计产值
+	<select id="getTotalCompleteValue" parameterClass="com.audit.entity.project.TractMonthReportInfo" resultClass="java.lang.String">
+	    SELECT t.totalCompleteValue FROM dbo.pro_tractMonthContent t 
+	    WHERE t.biaoDuanId = #biaoDuanId# 
+	    AND t.createTime = (SELECT MAX(t.createTime) 
+	    FROM dbo.pro_tractMonthContent t WHERE t.biaoDuanId = #biaoDuanId#)
+	</select>
+	 -->
+	
+	<!-- 获取当前累计产值 -->
+	<select id="getAddPayProjectMoney" parameterClass="com.audit.entity.project.TractMonthReportInfo" resultClass="java.lang.String">
+	    SELECT t.addPayProjectMoney FROM dbo.pro_tractMonthContent t 
+	    WHERE t.biaoDuanId = #biaoDuanId# 
+	    AND t.createTime = (SELECT MAX(t.createTime) 
+	    FROM dbo.pro_tractMonthContent t WHERE t.biaoDuanId = #biaoDuanId#)
+	</select>
+</sqlMap>

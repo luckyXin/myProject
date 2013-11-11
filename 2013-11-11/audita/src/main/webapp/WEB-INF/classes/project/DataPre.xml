@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="dataprexml">
+
+   <typeAlias alias="Datapreinfo" type="com.audit.entity.project.Datapreinfo"/>
+     <!-- 分页查询的动态sql -->
+	  <select id="selectDatapreinfopage" parameterClass="Datapreinfo" resultClass="Datapreinfo">   
+	     select d.id,d.datapreno,d.isArrangement,d.projectNo,d.projectName,dic.dictionaryname as audittype,d.projectTime,d.auditMoney,d.zjMoney,d.zbMoney,d.htmoney,d.zhanliemoney,d.budgetInfo,d.budgetTotalMoney,d.budgetDirectMoney,d.budgetUpdateTime,po.ownerName as ownerName,u.username as mainAuditId,inter.intermediaryname as intermediaryId,s.id as arrangeid,s.isMySelfState,d.constructId,d.sentAmount,i.auditmoney as interauditmoney,i.cutmoney as intercutmoney,i.auditlv as intercutmoneylv,g.auditMoney as empauditMoney,g.reduceMoney,g.auditlv as reduceMoneylv,d.datapretime from pro_datapreinfo d
+		left join pro_singleProjectArrange s
+		on d.id=s.datapreId
+		left join pro_intermediaryaudit i
+		on d.id=i.datapreId
+		left join pro_governmentEmployeeAudit g
+		on d.id=g.datapreId
+		left join pro_mainAuditInfo m
+		on m.projectId=d.id
+		left join sys_projectowner po
+		on po.id=d.proownerid
+		left join sys_intermediaryagency inter
+		on  inter.id=s.intermediaryId
+		left join sys_userinfo u
+		on u.id=s.mainAuditId
+		left join sys_dictionary dic
+		on dic.id=d.audittype
+		where 1=1  
+	      <dynamic prepend="and">
+             <isNotEmpty property="projectName">
+                       d.projectName like '%$projectName$%'
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="proownerid">
+                       d.proownerid = #proownerid#
+             </isNotEmpty>
+         </dynamic>
+           <dynamic prepend="and">
+             <isNotEmpty property="isconfirmSubmit">
+                       d.isconfirmSubmit = #isconfirmSubmit#
+             </isNotEmpty>
+         </dynamic>
+         <dynamic prepend="and">
+             <isNotEmpty property="audittype">
+                      d.audittype = #audittype# 
+             </isNotEmpty>
+         </dynamic>
+         <isNotEmpty property="beginTime">
+                 AND  d.datapretime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  d.datapretime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  </select> 
+	  
+	  <!-- 查询子项目 -->
+	  <select id="selectpidDatapreinfopage" parameterClass="Datapreinfo" resultClass="Datapreinfo">   
+	     select d.id,d.datapreno,d.projectNo,d.pid,d.projectTime,d.projectName,d.proownerid,p.ownerName,d.proownerlink,d.constructId,
+	     d.isExpedited,d.datapreopinion,d.audittype,d.datapretime,d.state,d.state as constructstate,d.isconfirmSubmit from pro_datapreinfo d left join sys_projectowner p on
+           d.proownerId=p.id  
+            where 1=1 and  d.pid!='0' and (p.state=0 or p.state is null)
+	      <dynamic prepend="and">
+             <isNotEmpty property="projectName">
+                       d.projectName like '%$projectName$%'
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="proownerid">
+                       d.proownerid = #proownerid#
+             </isNotEmpty>
+         </dynamic>
+           <dynamic prepend="and">
+             <isNotEmpty property="isconfirmSubmit">
+                       d.isconfirmSubmit = #isconfirmSubmit#
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="audittype">
+                      d.audittype = #audittype# 
+             </isNotEmpty>
+         </dynamic>
+         <isNotEmpty property="beginTime">
+                 AND  d.datapretime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  d.datapretime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+	  </select> 
+	  <!-- 查询其它子项目 -->
+	  <select id="selectnotpidDatapreinfopage" parameterClass="Datapreinfo" resultClass="Datapreinfo">   
+	     select d.id,d.datapreno,d.projectNo,d.pid,d.projectTime,d.projectName,d.proownerid,p.ownerName,d.proownerlink,d.constructId,
+	     d.isExpedited,d.datapreopinion,d.audittype,d.datapretime,d.state,d.state as constructstate,d.isconfirmSubmit from pro_datapreinfo d left join sys_projectowner p on
+           d.proownerId=p.id  
+              where 1=1 and  d.pid!='0' and d.pid!=#id# and (p.state=0 or p.state is null)
+	      <dynamic prepend="and">
+             <isNotEmpty property="projectName">
+                       d.projectName like '%$projectName$%'
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="proownerid">
+                       d.proownerid = #proownerid#
+             </isNotEmpty>
+         </dynamic>
+           <dynamic prepend="and">
+             <isNotEmpty property="isconfirmSubmit">
+                       d.isconfirmSubmit = #isconfirmSubmit#
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="audittype">
+                      d.audittype = #audittype# 
+             </isNotEmpty>
+         </dynamic>
+         <isNotEmpty property="beginTime">
+                 AND  d.datapretime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  d.datapretime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+	  </select> 
+	  
+	  <!-- 查询总的记录条数 -->
+	   <select id="selectDatapreinfocount" parameterClass="Datapreinfo" resultClass="java.lang.Integer">   
+	        select count(1) from pro_datapreinfo d 
+	        where 1=1 
+	      <dynamic prepend="and">
+             <isNotEmpty property="projectName">
+                       d.projectName like '%$projectName$%'
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="proownerid">
+                       d.proownerid = #proownerid#
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="isconfirmSubmit">
+                       d.isconfirmSubmit = #isconfirmSubmit#
+             </isNotEmpty>
+         </dynamic>
+          <dynamic prepend="and">
+             <isNotEmpty property="audittype">
+                      d.audittype = #audittype# 
+             </isNotEmpty>
+         </dynamic>
+         <isNotEmpty property="beginTime">
+                 AND  d.datapretime >= #beginTime#
+         </isNotEmpty>
+         <isNotEmpty property="endTime">
+         <![CDATA[ 
+                 AND  d.datapretime <= #endTime#
+           ]]> 
+         </isNotEmpty>
+	  </select>   
+	  
+	  
+	  <!-- 分页查询的动态sql 下级-->
+	  <select id="selectDatapreinfochildpage" parameterClass="Datapreinfo" resultClass="Datapreinfo">   
+	    select d.id,d.datapreno,d.pid,d.projectNo,d.projectTime,d.projectName,d.proownerid,p.ownerName,d.proownerlink,d.constructId,
+	     d.isExpedited,d.datapreopinion,d.audittype,d.datapretime,d.state,d.state as constructstate,d.isconfirmSubmit from pro_datapreinfo d left join sys_projectowner p on
+           d.proownerId=p.id  
+             where 1=1   and (p.state=0 or p.state is null)
+            and d.pid=#id#
+	  </select> 
+	  
+
+	    <!-- 判断立项文号是否存在 增加-->
+	   <select id="selectishaveprojectno" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	      select count(*) from pro_datapreinfo where projectNo=#projectNo#
+	  </select>
+	    <!-- 判断立项文号是否存在修改 -->
+	   <select id="selectisupdatehaveprojectno" parameterClass="Datapreinfo" resultClass="java.lang.Integer">   
+	      select count(*) from pro_datapreinfo where projectNo=#projectNo# and id!=#id#
+	  </select>
+	    <!-- 判断项目名称是否存在 增加-->
+	   <select id="selectishaveprojectName" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	      select count(*) from pro_datapreinfo where projectName=#projectName#
+	  </select>
+	    <!-- 判断项目名称是否存在修改 -->
+	   <select id="selectisupdatehaveprojectName" parameterClass="Datapreinfo" resultClass="java.lang.Integer">   
+	      select count(*) from pro_datapreinfo where projectName=#projectName# and id!=#id#
+	  </select>
+	  
+	  
+	  <!-- 查询资料预审对象 -->
+	  <select id="selectdataprebyid" parameterClass="java.lang.String" resultClass="Datapreinfo">   
+	       select * from  pro_datapreinfo where id=#id#
+	  </select> 
+	  
+	  <!-- 查询资料预审对象 -->
+	  <select id="selectdatapreObject" parameterClass="java.lang.String" resultClass="com.audit.entity.project.DataPreBaseWordInfo">   
+	       select * from  pro_datapreinfo where id=#id#
+	  </select> 
+	  
+	   <!-- 查询id最大值 -->
+	   <select id="selectdatapremaxid" resultClass="java.lang.Integer">   
+	       select max(SUBSTRING (id,3,len(id))) from  pro_datapreinfo
+	  </select> 
+	  <!-- 增加 -->
+	   <insert id="adddatapre"  parameterClass="Datapreinfo">
+           insert into pro_datapreinfo
+           (id,datapreno,projectNo,reportNo,auditMoney,zjMoney,zbMoney,htmoney,zhanliemoney,projectTime,projectName,proownerid,proownerlink,proownertelphone,constructId,constructlink,constructtelphone,audittype,sentAmount,datapretime,isExpedited,datapreopinion,datapreOperate,isconfirmSubmit,isArrangement,state,pid,budgetInfo,budgetTotalMoney,budgetDirectMoney,budgetUpdateTime,budgetInfoFile) 
+           values
+           (#id#,#datapreno#,#projectNo#,#reportNo#,#auditMoney#,#zjMoney#,#zbMoney#,#htmoney#,#zhanliemoney#,#projectTime#,#projectName#,#proownerid#,#proownerlink#,#proownertelphone#,#constructId#,#constructlink#,#constructtelphone#,#audittype#,#sentAmount#,#datapretime#,#isExpedited#,#datapreopinion#,#datapreOperate#,#isconfirmSubmit#,#isArrangement#,#state#,#pid#,#budgetInfo#,#budgetTotalMoney#,#budgetDirectMoney#,#budgetUpdateTime#,#budgetInfoFile#)	  
+	  </insert>
+	  
+	  <!-- 修改 -->
+	  <update id="updatedatapre"  parameterClass="Datapreinfo">
+	      update pro_datapreinfo set
+	      datapreno=#datapreno#,
+	      reportNo=#reportNo#,
+	      projectNo=#projectNo#,
+	      auditMoney=#auditMoney#,
+	      zjMoney=#zjMoney#,
+	      zbMoney=#zbMoney#,
+	      htmoney=#htmoney#,
+	      zhanliemoney=#zhanliemoney#,
+	      projectTime=#projectTime#,
+	      projectName=#projectName#,
+	      proownerid=#proownerid#,
+	     proownerlink=#proownerlink#, 
+	     proownertelphone=#proownertelphone#,
+	     constructId=#constructId#,
+	     constructlink=#constructlink#,
+	     constructtelphone=#constructtelphone#,
+	     audittype=#audittype#,
+	     datapretime=#datapretime#,
+	     isExpedited=#isExpedited#,
+	     state=#state#,
+	     datapreopinion=#datapreopinion#,
+	     datapreOperate=#datapreOperate#,
+	     sentAmount=#sentAmount#,
+	     isconfirmSubmit=#isconfirmSubmit#,
+	     budgetInfo=#budgetInfo#,
+	     budgetTotalMoney=#budgetTotalMoney#,
+	     budgetDirectMoney=#budgetDirectMoney#,
+	     budgetUpdateTime=#budgetUpdateTime#,
+	     budgetInfoFile=#budgetInfoFile#
+	      where id=#id#
+	  </update>
+	   <!-- 删除 -->
+	  <delete id="deletedatapre"  parameterClass="Datapreinfo" >
+	    delete from pro_datapreinfo  where id=#id#
+	  </delete>
+	  
+	  <!-- 查询政府雇员审核单个项目信息 -->
+	  <select id="selectgoverauditprojectbasepage" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="com.audit.entity.project.ResultClassAuditlookproject">
+			 select t.* from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime,inter.auditstate from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			left join pro_governmentEmployeeAudit inter
+			on inter.datapreId=d.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime,inter.auditstate from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			left join pro_governmentEmployeeAudit inter
+			on inter.datapreId=d.id
+			where s.id=#arrangeId# 
+			) t   
+			 <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	   </select>
+	   
+	   <select id="selectgoverauditprojectbasecount" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="java.lang.Integer">
+	       select count(1) from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime,inter.auditstate from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			left join pro_governmentEmployeeAudit inter
+			on inter.datapreId=d.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime,inter.auditstate from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			left join pro_governmentEmployeeAudit inter
+			on inter.datapreId=d.id
+			where s.id=#arrangeId# 
+			) t   
+	   </select>
+	  
+	  <!-- 查询政府雇员审核单个项目信息 -->
+	  <select id="selectMainAuditProjectBasePage" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="com.audit.entity.project.ResultClassAuditlookproject">
+			 select t.* from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime,inter.auditstate from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			left join dbo.pro_mainAuditInfo inter
+			on inter.projectId=d.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime,inter.auditstate from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			left join dbo.pro_mainAuditInfo inter
+			on inter.projectId=d.id
+			where s.id=#arrangeId# 
+			) t
+			 <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	   </select>
+	   
+	  <select id="selectMainAuditProjectBasePageCount" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="java.lang.Integer">
+	       select count(1) from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime,inter.submitState as auditstate from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			left join dbo.pro_mainAuditInfo inter
+			on inter.projectId=d.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime,inter.submitState as auditstate from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			left join dbo.pro_mainAuditInfo inter
+			on inter.projectId=d.id
+			where s.id=#arrangeId# 
+			) t 
+	   </select>
+
+	  
+	  
+	  
+	  <!-- 查询中介审核单个项目信息 -->
+	  <select id="selectinterauditprojectbasepage" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="com.audit.entity.project.ResultClassAuditlookproject">
+			 select t.* from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime,inter.auditstate from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			left join pro_intermediaryaudit inter
+			on inter.datapreId=d.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime,inter.auditstate from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			left join pro_intermediaryaudit inter
+			on inter.datapreId=d.id
+			where s.id=#arrangeId# 
+			) t   
+			 <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	   </select>
+	   <select id="selectinterauditprojectbasecount" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="java.lang.Integer">
+	       select count(1) from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime,inter.auditstate from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			left join pro_intermediaryaudit inter
+			on inter.datapreId=d.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime,inter.auditstate from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			left join pro_intermediaryaudit inter
+			on inter.datapreId=d.id
+			where s.id=#arrangeId# 
+			) t   
+	   </select>
+	  
+	  
+	  
+	  
+	  
+	  <!-- 查询审核查看的单个项目信息 信息-->
+	   <select id="selectauditprojectbasepage" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="com.audit.entity.project.ResultClassAuditlookproject">
+			 select t.* from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			where pa.id=#arrangeId#  
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			where s.id=#arrangeId#
+			) t   
+			 <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	   </select>
+	   
+	    <select id="selectauditprojectbasecount" parameterClass="com.audit.entity.project.ResultClassAuditlookproject" resultClass="java.lang.Integer">
+			 select count(1) from
+			(
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,pa.id as arrangeId,pa.intermediaryId,pa.intermediaryAuditTime,pa.intermediarySendTime from  pro_datapreinfo d inner join    pro_packProjectRelate pr
+			on d.id=pr.projectId
+			inner join pro_packProjectArrange pa
+			on pr.projectPackId=pa.id
+			where pa.id=#arrangeId#   
+			union all
+			select d.id as datapreId,d.projectName,d.proownerid,d.constructId,d.sentAmount,s.id as arrangeId,s.intermediaryId,s.intermediaryAuditTime,s.intermediarySendTime from pro_datapreinfo d inner join  pro_singleProjectArrange s on d.id=s.datapreId  
+			where s.id=#arrangeId# 
+			) t  
+	   </select>
+	  
+	  
+	  
+	  <!-- 查询资料中介审减的金额 -->
+	  <select id="selectsingleinterauditmoney" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ResultInterAuidt">
+	     select d.projectName,d.sentAmount,i.auditmoney,i.cutmoney from  pro_datapreinfo d left join pro_intermediaryaudit i 
+         on i.datapreId=d.id where d.id=#id#
+	  </select>
+	  
+	   <!-- 查询资料政府雇员审减的金额 -->
+	  <select id="selectsingleengauditmoney" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ResultInterAuidt">
+	       select d.projectName,d.sentAmount,d.datapretime,g.auditStartTime as startaudittime,g.auditEndTime as audittime,g.auditMoney,g.reduceMoney as cutmoney,i.auditmoney as interauditmoney,i.cutmoney as intercutmoney  from 
+		   pro_datapreinfo d 
+		   left join pro_governmentEmployeeAudit g
+		   on g.datapreId=d.id 
+		   left join pro_intermediaryaudit i
+		   on i.datapreId=d.id
+            where d.id=#id#
+	  </select>
+	  
+	  <!-- 查询打包项目中介审核信息 -->
+	    <select id="selectpackinterauditmoney" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ResultInterAuidt">
+	      select d.projectName,d.sentAmount,i.auditmoney,i.cutmoney from  pro_datapreinfo d left join pro_intermediaryaudit i 
+         on i.datapreId=d.id where d.id in(select projectId from pro_packProjectRelate where projectPackId =#id# )
+	  </select>
+	  
+	    <!-- 查询打包项目政府雇员审减的金额 -->
+	  <select id="selectpackengauditmoney" parameterClass="java.lang.String" resultClass="com.audit.entity.project.ResultInterAuidt">
+	       select d.projectName,d.sentAmount,d.datapretime,g.auditEndTime as audittime,g.auditMoney,g.reduceMoney as cutmoney  from  pro_datapreinfo d left join pro_governmentEmployeeAudit g
+          on g.datapreId=d.id where d.id in(select projectId from pro_packProjectRelate where projectPackId =#id# )
+	  </select>
+	  
+	  <!-- 根据安排id查询中介机构 -->
+      <select id="selectzhongjiebyarrangeId" parameterClass="java.lang.String" resultClass="com.audit.entity.project.SingleProjectArrange">
+         select s.intermediaryId,i.intermediaryname as intermediaryName from pro_singleProjectArrange s
+			left join sys_intermediaryagency i
+			on s.intermediaryId=i.id
+			where s.id=#id#
+      </select>
+      
+      <!-- 更改中介机构 -->
+      <update id="updateDatapreZj"  parameterClass="com.audit.entity.project.SingleProjectArrange">
+           update pro_singleProjectArrange set intermediaryId=#intermediaryId#
+           where id=#id#
+      </update>
+	 
+</sqlMap>
+

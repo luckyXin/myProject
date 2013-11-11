@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="noticemap">   
+  <typeAlias alias="NoticeInfo" type="com.audit.entity.system.NoticeInfo"/>   
+  
+   <!-- 分页查询公告数据 -->
+	  <select id="selectAllNoticepage" parameterClass="NoticeInfo" resultClass="NoticeInfo">   
+	     select * from sys_noticeinfo where 1=1 
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+             <isEmpty property="filed">
+                  createtime desc
+             </isEmpty>
+         </dynamic>
+	  </select> 
+	  <!-- 查询公告总的记录条数 -->
+	   <select id="selectNoticeAllcount" parameterClass="NoticeInfo" resultClass="java.lang.Integer">   
+		  select count(*) from sys_noticeinfo  where 1=1
+	  </select> 
+	  
+	  <!-- 查询公告对象 -->
+	   <select id="selectnoticeobject" parameterClass="java.lang.String" resultClass="NoticeInfo">   
+	      select * from sys_noticeinfo where id=#id#
+	  </select>
+	  
+	  <!-- 增加公告 -->
+	  <insert id="addnotice" parameterClass="NoticeInfo">
+	      insert into sys_noticeinfo(id,title,content,createtime) values(#id#,#title#,#content#,#createtime#)
+	  </insert>
+	  
+	  <!--修改公告 -->
+	  <update id="updatenotice"  parameterClass="NoticeInfo">
+	     update sys_noticeinfo set 
+	     title=#title#,
+	     content=#content#,
+	     createtime=#createtime#
+	     where id=#id#
+	  </update>
+	  
+	  <!-- 删除公告 -->
+	  <delete id="deletenotice" parameterClass="java.lang.String">
+	     delete from sys_noticeinfo where id=#id#
+	  </delete>
+	  
+	  <!-- 查询前5条公告消息 -->
+	   <select id="selecttopdata"  resultClass="NoticeInfo">   
+	        select top(5) n.title,n.createtime as fabutime,n.content,n.id from sys_noticeinfo n order by n.createtime desc
+	   </select>
+ </sqlMap>   
+

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="tractDataEnquiryXml">
+   
+   <select id="selectalldataenquirypage" parameterClass="com.audit.entity.project.TractProjectDataEnquiry" resultClass="com.audit.entity.project.TractProjectDataEnquiry">
+	     select * from pro_tractProjectDataEnquiry where 1=1
+	     and biaoDuanId=#biaoDuanId#
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  
+	  </select>
+	  <!--
+	   查询材料询价的记录条数 
+	  -->
+	  <select id="selectalldataenquirycount" parameterClass="com.audit.entity.project.TractProjectDataEnquiry" resultClass="java.lang.Integer">   
+	    select count(1) from pro_tractProjectDataEnquiry where 1=1
+	     and biaoDuanId=#biaoDuanId#
+	  </select>
+	  
+	  <!--  增加材料询价信息 -->
+	 <insert id="adddataenquiry"  parameterClass="com.audit.entity.project.TractProjectDataEnquiry">
+	   insert into pro_tractProjectDataEnquiry(id,biaoDuanId,datafile,dataname,createuser,createtime) values
+	    (#id#,#biaoDuanId#,#datafile#,#dataname#,#createuser#,#createtime#)
+	</insert>
+	
+	 <!-- 修改材料询价信息 -->
+	<update id="updatedataenquiry" parameterClass="com.audit.entity.project.TractProjectDataEnquiry">
+	   update  pro_tractProjectDataEnquiry
+	   set
+	  biaoDuanId=#biaoDuanId#,
+	  datafile=#datafile#,
+	  dataname=#dataname#,
+	  createuser=#createuser#,
+	  createtime=#createtime#
+	   where id=#id#
+	</update>
+	
+
+	<!--  根据标段id查询材料询价信息  -->
+	<select id="selectdataenquirybybdid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.TractProjectDataEnquiry">
+	select * from pro_tractProjectDataEnquiry  where biaoDuanId=#id#
+	</select>
+	
+	<!-- 根据id查询材料询价对象 -->
+	<select id="selectdataenquirybyid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.TractProjectDataEnquiry">
+	select * from pro_tractProjectDataEnquiry  where id=#id#
+	</select>
+	
+	<!-- 根据id查询材料询价 -->
+	<delete id="deldataenquiry" parameterClass="java.lang.String">
+	   delete from pro_tractProjectDataEnquiry where id=#id#
+	</delete>
+    
+</sqlMap>

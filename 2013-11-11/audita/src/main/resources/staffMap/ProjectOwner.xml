@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="projectOwner">
+
+	<typeAlias alias="projectOwner" type="com.audit.entity.staff.ProjectOwner" />
+	<select id="getProjectOwnerById" parameterClass="java.lang.String"
+		resultClass="projectOwner">
+		SELECT
+		id,ownerName,ownerReferred,unitType as
+		unitTypeId,isMainUnit,state,remark FROM
+		dbo.sys_projectowner
+		WHERE id =
+		#id#
+   </select>
+
+	<select id="getProjectOwnerCount" parameterClass="projectOwner"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.sys_projectowner WHERE 1=1
+		<isNotEmpty property="ownerName">
+			AND ownerName LIKE '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="state">
+			AND state = #state#	
+		</isNotEmpty>
+	</select>
+
+	<select id="getProjectOwnerByIndexCount" parameterClass="projectOwner"
+		resultClass="projectOwner">
+		SELECT TOP $pagesize$
+		t1.id,
+		t1.isMainUnit,
+		t1.ownerReferred,
+		t1.ownerName,
+		t1.remark,
+		t1.state,
+		t2.dictionaryname as unitType
+		FROM
+		dbo.sys_projectowner t1
+
+		left Join
+
+		dbo.sys_dictionary t2
+
+		ON t1.unitType =
+
+		t2.id
+
+		WHERE t1.id >
+		(
+		SELECT ISNULL(MAX(id),0)
+		FROM
+		(
+		SELECT TOP <![CDATA[($pagesize$*$pageno$)]]>
+		t1.id FROM
+		dbo.sys_projectowner t1
+		LEFT JOIN dbo.sys_dictionary t2
+		ON
+		t1.unitType = t2.id
+		WHERE 1=1
+
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName LIKE '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="state">
+			AND t1.state = #state#	
+		</isNotEmpty>
+		ORDER BY id
+		) A
+		)
+		<isNotEmpty property="ownerName">
+			AND t1.ownerName LIKE '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="state">
+			AND t1.state = #state#	
+		</isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+	        </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			ORDER BY t1.id
+	    </isEmpty>
+	</select>
+
+	<select id="getUnitTypeById" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.Dictionary">
+		SELECT id,dictionaryname,pid,issystem,remark FROM
+		dbo.sys_dictionary Where
+		pid = #id#
+	</select>
+
+	<insert id="addProjectOwner" parameterClass="projectOwner">
+		INSERT INTO
+		dbo.sys_projectowner
+		(id
+		,ownerName
+		,ownerReferred
+		,unitType
+		,isMainUnit
+		,state
+		,remark)
+		VALUES
+		(#id#
+		,#ownerName#
+		,#ownerReferred#
+		,#unitType#
+		,#isMainUnit#
+		,#state#
+		,#remark#)
+	</insert>
+
+	<select id="getProjectOwnerId" resultClass="java.lang.Integer">
+		Select max(SUBSTRING
+		(id,3,len(id)))from sys_projectowner
+	</select>
+
+	<insert id="addLinkByProjectOwnerId" parameterClass="com.audit.entity.staff.Link">
+		INSERT INTO
+		dbo.sys_link
+		(referid
+		,linkname
+		,linktellphone)
+		VALUES
+		(#referid#
+		,#linkname#
+		,#linktellphone#)
+	</insert>
+
+	<update id="updateProjectOwner" parameterClass="projectOwner">
+		UPDATE
+		dbo.sys_projectowner
+		SET
+		ownerName = #ownerName#
+		,ownerReferred =
+		#ownerReferred#
+		,unitType = #unitType#
+		,isMainUnit = #isMainUnit#
+		,state
+		= #state#
+		,remark = #remark#
+		WHERE
+		id = #id#
+    </update>
+
+	<update id="updateProjectOwnerState">
+		UPDATE dbo.sys_projectowner
+		SET
+		state = #state#
+		WHERE
+		id
+		= #id#
+    </update>
+
+	<delete id="deleteProjectOwner" parameterClass="java.lang.String">
+		DELETE FROM
+		dbo.sys_projectowner
+		WHERE id=#id#
+    </delete>
+</sqlMap>
+

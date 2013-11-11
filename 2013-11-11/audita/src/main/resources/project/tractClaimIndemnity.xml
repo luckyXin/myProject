@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="tractClaimIndemnity">
+    <!-- 分页查询索赔信息的动态sql -->
+	  <select id="selectallsuopeipage" parameterClass="com.audit.entity.project.TractClaimIndemnityContext" resultClass="com.audit.entity.project.TractClaimIndemnityContext">
+	     select * from pro_tractClaimIndemnityContext where 1=1
+	     and biaoDuanId=#biaoDuanId#
+	     <dynamic prepend="and">
+             <isNotEmpty property="claimIndemnityType">
+                       claimIndemnityType = #claimIndemnityType#
+             </isNotEmpty>
+         </dynamic>
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	  
+	  </select>
+	  <!-- 查询索赔总的记录条数 -->
+	  <select id="selectallsuopeicount" parameterClass="com.audit.entity.project.TractClaimIndemnityContext" resultClass="java.lang.Integer">   
+	    select count(1) from pro_tractClaimIndemnityContext where 1=1
+	     and biaoDuanId=#biaoDuanId#
+	     <dynamic prepend="and">
+             <isNotEmpty property="claimIndemnityType">
+                       claimIndemnityType = #claimIndemnityType#
+             </isNotEmpty>
+         </dynamic>
+	  </select>   
+
+
+
+	<!-- 增加索赔信息 -->
+	<insert id="addsuopei"  parameterClass="com.audit.entity.project.TractClaimIndemnityContext">
+	   insert into pro_tractClaimIndemnityContext(id,biaoDuanId,claimIndemnityType,constructSentMoney,indemnityMoney,auditMoney,ownerReadyMoney,createTime,createUserAccount,claimitem,caseexplain,auditdetail) values
+	   (#id#,#biaoDuanId#,#claimIndemnityType#,#constructSentMoney#,#indemnityMoney#,#auditMoney#,#ownerReadyMoney#,#createTime#,#createUserAccount#,#claimitem#,#caseexplain#,#auditdetail#)
+	</insert>
+	
+	<!-- 修改索赔-->
+	<update id="updatesuopei" parameterClass="com.audit.entity.project.TractClaimIndemnityContext">
+	   update  pro_tractClaimIndemnityContext
+	   set
+	   claimIndemnityType=#claimIndemnityType#,
+	   constructSentMoney=#constructSentMoney#,
+	   indemnityMoney=#indemnityMoney#,
+	   auditMoney=#auditMoney#,
+	   ownerReadyMoney=#ownerReadyMoney#,
+	   createTime=#createTime#,
+	   createUserAccount=#createUserAccount#,
+	   claimitem=#claimitem#,
+	   caseexplain=#caseexplain#,
+	   auditdetail=#auditdetail#
+	   where id=#id#
+	</update>
+	
+
+	
+	<!-- 根据标段id查询索赔信息对象 -->
+	<select id="selectsuopeibybdid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.TractClaimIndemnityContext">
+	select * from pro_tractClaimIndemnityContext  where biaoDuanId=#id#
+	</select>
+	
+	<!-- 根据id查询索赔对象 -->
+	<select id="selectsuopeibyid" parameterClass="java.lang.String" resultClass="com.audit.entity.project.TractClaimIndemnityContext">
+	select * from pro_tractClaimIndemnityContext  where id=#id#
+	</select>
+	
+	<!-- 根据id删除索赔 -->
+	<delete id="delsuopei" parameterClass="java.lang.String">
+	   delete from pro_tractClaimIndemnityContext where id=#id#
+	</delete>
+</sqlMap>

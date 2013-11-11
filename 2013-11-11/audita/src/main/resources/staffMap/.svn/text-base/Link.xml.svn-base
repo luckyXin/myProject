@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Linkxml">
+
+   <typeAlias alias="link" type="com.audit.entity.staff.Link"/>
+	  <!-- 增加联系人信息 -->
+	  <insert id="addLink"  parameterClass="link">
+          insert into sys_link(referid,linkname,linktellphone)
+          values
+          (#referid#,#linkname#,#linktellphone#)
+	  </insert>
+	  <!-- 根据id查询联系人信息 -->
+	   <select id="selectlinkbyid" parameterClass="java.lang.String" resultClass="link">   
+	      select * from sys_link where id=#id#
+	  </select>
+	  <!-- 删除联系人 -->
+	  <delete id="deltelink" parameterClass="java.lang.String">
+	     delete from sys_link where referid=#id#
+	  </delete>
+	   <!-- 根据id查询联系人信息 -->
+	   <select id="getLinkList" parameterClass="java.lang.String" resultClass="link">   
+	        select * from  sys_link where referid = #id#   
+	  </select>
+
+</sqlMap>
+

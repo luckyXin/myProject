@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="usermap">   
+  <typeAlias alias="User" type="com.audit.entity.User"/>   
+  <typeAlias alias="EditUser" type="com.audit.entity.EditUser"/>
+  <typeAlias alias="Dictionary" type="com.audit.entity.Dictionary"/>   
+  <typeAlias alias="Department" type="com.audit.entity.Department"/>   
+  
+  
+  <resultMap id="UserResult" class="User">   
+	  <result property="id" column="id"/>   
+	  <result property="userAccount" column="userAccount"/>
+	  <result property="password" column="password"/>   
+	  <result property="username" column="username"/>   
+	  <result property="birthday" column="birthday"/>   
+	  <result property="cardId" column="cardId"/>   
+	  <result property="telphone" column="telphone"/>   
+	  <result property="email" column="email"/>   
+	  <result property="state" column="state"/>   
+	  <result property="remark" column="remark"/>   
+	  <result property="createTime" column="createTime"/>   
+      <result property="deptid" column="deptid" select="getDeptById"/> 
+      <result property="sex" column="sex" select="getDicById"/> 
+      <result property="qualification" column="qualification" select="getDicById"/>   
+  </resultMap>
+  
+     <!-- 分页查询用户信息的动态sql -->
+	  <select id="selectAllUser" parameterClass="com.audit.entity.User" resultMap="UserResult">   
+	   
+	     select * from sys_userinfo where state!=2 and userAccount!='admin'
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+         </dynamic>
+	    <isEmpty property="filed">
+	       order by createtime desc
+	    </isEmpty>
+	  </select> 
+	  <!-- 查询用户总的记录条数 -->
+	   <select id="selectAllcount" parameterClass="com.audit.entity.User" resultClass="java.lang.Integer">   
+	      select count(*) from sys_userinfo where state!=2 and userAccount!='admin'
+	  </select>   
+	  <!-- 根据id查询部门对象 -->
+	  <select id="getDeptById" parameterClass="java.lang.String" resultClass="Department">   
+	  <![CDATA[   
+	  select * from sys_department where id = #id#   
+	  ]]>   
+	  </select>
+	  <!-- 根据id查询字典对象 -->
+	   <select id="getDicById" parameterClass="java.lang.String" resultClass="Dictionary">   
+	  <![CDATA[   
+	  select * from  sys_dictionary where id = #id#   
+	  ]]>   
+	  </select>
+	  <!-- 查询id最大值 -->
+	   <select id="selectmaxid" resultClass="java.lang.Integer">   
+	  <![CDATA[   
+	  select max(SUBSTRING (id,2,len(id))) from  sys_userinfo
+	  ]]>   
+	  </select> 
+	  <!-- 增加用户 -->
+	  <insert id="adduser"  parameterClass="EditUser">
+           insert into sys_userinfo(id,userAccount,username,password,istype,sex,birthday,cardId,telPhone,email,qualification,deptid,state,remark,createTime) 
+           values
+           (#id#,#userAccount#,#username#,#password#,#istype#,#sex#,#birthday#,#cardId#,#telPhone#,#email#,#qualification#,#deptid#,#state#,#remark#,#createTime#)	  
+	  </insert>
+	 <!-- 修改用户 -->
+	 <update id="updateuser"  parameterClass="EditUser">
+           update sys_userinfo set
+           username=#username#,	
+           sex=#sex#,
+           birthday=#birthday#,
+           cardId=#cardId#,
+           telPhone=#telPhone#,
+           email=#email#,
+           istype=#istype#,
+           qualification=#qualification#,
+           deptid=#deptid#,
+           state=#state#,
+           remark=#remark#
+           where id=#id#  
+	 </update>
+	 
+	  <!-- 修改用户密码 -->
+	 <update id="updateuserpwd"  parameterClass="EditUser">
+           update sys_userinfo set
+           password=#password#
+           where id=#id#  
+	 </update>
+     <!-- 删除用户 -->
+     <update id="deleteuser"  parameterClass="EditUser">
+          update sys_userinfo set
+           state=#state#,
+           where id=#id#  
+	  </update>
+	  
+	  <!-- 根据id查询用户对象 -->
+	   <select id="selectuserbyid" parameterClass="java.lang.String" resultClass="EditUser">   
+	      select * from sys_userinfo where id=#id#
+	  </select>
+	  
+	  <!-- 根据用户账号查询用户对象 -->
+	   <select id="selectuserbyuseraccount" parameterClass="java.lang.String" resultClass="EditUser">   
+	      select * from sys_userinfo where userAccount=#userAccount#
+	  </select>
+	  
+	  <!-- 判断用户账号是否存在 -->
+	   <select id="selectuserbyuserAccount" parameterClass="java.lang.String" resultClass="java.lang.Integer">   
+	      select count(*) from sys_userinfo where userAccount=#userAccount#
+	  </select>
+	  
+	  <!-- 查询安排的政府雇员 -->
+	  <select id="selectgovernmentEmpUserName"  parameterClass="java.lang.String" resultClass="EditUser">
+	       select username from sys_userinfo where id in(select governmentEmployeeId  from pro_employeeArrangeRelate where projectArrangeId=#projectArrangeId#)
+	  
+	  </select>
+	  
+	   <!-- 根据查询所有用户 -->
+	   <select id="selectquanbuuser" resultClass="EditUser">   
+	      select * from sys_userinfo 
+	  </select>
+ </sqlMap>   
+

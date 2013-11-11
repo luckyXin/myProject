@@ -1,0 +1,15 @@
+
+input {
+	height: 20px;
+	width: 155px;
+	margin-left: 3px;
+}
+#code {
+	height: 20px;
+	width: 65px;
+	margin-right: 10px;
+}
+#checkbox {
+	height: 16px;
+	width: 16px;
+} 

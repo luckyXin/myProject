@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="login">
+
+	<typeAlias alias="user" type="com.audit.entity.User" />
+	<typeAlias alias="function" type="com.audit.entity.Function"/>
+
+	<select id="getlogin" parameterClass="user" resultClass="user">
+		SELECT
+		id,
+		userAccount,
+		password,
+		username,
+		birthday,
+		cardId,
+		telphone,
+		email
+		FROM dbo.sys_userinfo
+		WHERE
+		userAccount = #userAccount# AND password=#password#
+		and  state=0
+	</select>
+
+	<select id="getQualification" resultClass="function">
+		SELECT
+			t6.id,
+			t6.method,
+			t6.name,
+			t6.remark,
+			t6.state,
+			t6.createTime
+		FROM dbo.sys_userinfo t1
+		LEFT JOIN  dbo.sys_roleuser t2
+			ON t1.id = t2.id
+		LEFT JOIN dbo.sys_role t3
+			ON t2.id = t3.id
+		LEFT JOIN dbo.sys_rolemodulefun t4
+			ON t3.id = t4.id
+		LEFT JOIN dbo.sys_modulefun t5
+			ON t4.id = t5.id
+		LEFT JOIN dbo.sys_function t6
+			ON t6.id = t5.id
+		WHERE
+			userAccount = #userAccount# and password = #userAccount#
+		AND 
+			t6.state = '0'
+	</select>
+
+</sqlMap>
+

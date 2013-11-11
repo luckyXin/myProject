@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes
+END
+promptMessage.properties
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/promptMessage.properties
+END
+SqlMapConfig.xml
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/SqlMapConfig.xml
+END
+systemMessage.properties
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/systemMessage.properties
+END
+fileTemplateName.properties
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/fileTemplateName.properties
+END
+pageTitle.properties
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/pageTitle.properties
+END
+flowConfiguration.properties
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/flowConfiguration.properties
+END
+log4j.properties
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/log4j.properties
+END
+jdbc.properties
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/project/!svn/ver/48/new/11-8-2/audita/src/main/webapp/WEB-INF/classes/jdbc.properties
+END

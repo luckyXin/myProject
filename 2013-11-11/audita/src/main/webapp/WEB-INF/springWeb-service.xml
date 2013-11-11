@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<!-- doc文档操作部件 -->
+	<bean id="AuditDocumentComponent" class="com.audit.component.impl.AuditDocumentComponentImpl"></bean>
+
+	<!-- 公共查询权限业务 -->
+	<bean id="CompetenceServiceImpl" class="com.audit.service.common.impl.CompetenceServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 登录管理业务 -->
+	<bean id="loginServiceImpl" class="com.audit.service.common.impl.LoginServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 菜单管理业务 -->
+	<bean id="iMenuInfoService" class="com.audit.service.system.impl.MenuInfoServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 用户管理业务 -->
+	<bean id="userInfoService" class="com.audit.service.system.impl.UserInfoServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 公告管理业务 -->
+	<bean id="noticeInfoService" class="com.audit.service.system.impl.NoticeInfoServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 消息管理业务 -->
+	<bean id="messageInfoService" class="com.audit.service.system.impl.MessageInfoServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+	<!-- 定义字典 -->
+	<bean id="dictionaryServiceServerImpl"
+		class="com.audit.service.system.impl.DictionaryServiceServerImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 机构业务 -->
+	<bean id="departmentServiceImpl" class="com.audit.service.system.impl.DepartmentServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 模块管理业务 -->
+	<bean id="iModuleInfoService" class="com.audit.service.system.impl.ModuleInfoServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 方法管理业务 -->
+	<bean id="iFunctionInfoService" class="com.audit.service.system.impl.FunctionServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 角色管理业务 -->
+	<bean id="iRoleInfoService" class="com.audit.service.system.impl.RoleInfoServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 施工企业业务 -->
+	<bean id="constructionServiceImpl" class="com.audit.service.staff.impl.ConstructionServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 初始数据提取 -->
+	<bean id="idPoolsInitilizedProcessor" class="com.audit.common.IDPoolsInitilizedBean"
+		scope="singleton" />
+
+	<!-- 施工企业业务 -->
+	<bean id="iProjectOwnerService" class="com.audit.service.staff.impl.ProjectOwnerServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+
+	<!-- 中介机构管理 -->
+	<bean id="iIntermediaryagencyService"
+		class="com.audit.service.staff.impl.IntermediaryagencyServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 资料预审管理 -->
+	<bean id="iProjectDatePreService"
+		class="com.audit.service.project.impl.ProjectDatePreServiceImpl">
+		<property name="ibatisCommonDAO" ref="ibatisCommonDAO"></property>
+	</bean>
+
+	<!-- 单项目安排管理 -->
+	<bean id="iSingleProjectArrange"
+		class="com.audit.service.project.impl.SingleProjectArrangeServiceImpl"></bean>
+
+	<!-- 打包项目安排管理 -->
+	<bean id="packProjectArrange"
+		class="com.audit.service.project.impl.PackProjectArrangeServiceImpl"></bean>
+
+	<!-- 任务管理 -->
+	<bean id="workManageService" class="com.audit.service.work.impl.MyWorkServiceImpl"></bean>
+
+
+	<!-- 政府交办 -->
+	<bean id="governmentAssignService"
+		class="com.audit.service.project.impl.GovernmentAssignServiceImpl"></bean>
+
+	<!-- 中介审核 -->
+	<bean id="intermediaryAuditService"
+		class="com.audit.service.project.impl.IntermediaryAuditServiceImpl"></bean>
+
+	<!-- 科长审批 -->
+	<bean id="sectionChiefAuditService"
+		class="com.audit.service.project.impl.SectionChiefAuditServiceImpl"></bean>
+
+	<!-- 法制科长审批 -->
+	<bean id="legalSectionChiefAuditService"
+		class="com.audit.service.project.impl.LegalSectionChiefAuditServiceImpl"></bean>
+
+	<!-- 法制科分管审批 -->
+	<bean id="legalAreaLeaderAuditService"
+		class="com.audit.service.project.impl.LegalAreaLeaderAuditServiceImpl"></bean>
+
+	<!-- 政府雇员审核 -->
+	<bean id="proEngineerAuditService"
+		class="com.audit.service.project.impl.ProEngineerAuditServiceImpl"></bean>
+
+	<!-- 结算审计费用 -->
+	<bean id="proAuditMoenyService" class="com.audit.service.project.impl.ProAuditMoenyServiceImpl"></bean>
+
+	<!--会议记录 -->
+	<bean id="proConferenceService" class="com.audit.service.project.impl.ProConferenceServiceImpl"></bean>
+
+	<!-- 分管领导审批 -->
+	<bean id="areaLeaderAuditService"
+		class="com.audit.service.project.impl.AreaLeaderAuditServiceImpl"></bean>
+
+	<!-- 主审审核 -->
+	<bean id="mainEmployeeAuditService"
+		class="com.audit.service.project.impl.MainEmployeeAuditServiceImpl"></bean>
+
+	<!-- 综合查询 -->
+	<bean id="allProejctSearchService"
+		class="com.audit.service.search.impl.AllProjectSearchServiceImpl"></bean>
+
+	<!-- 跟踪审计项目立项管理 -->
+	<bean id="tractProjectCreateServiceImpl"
+		class="com.audit.service.project.impl.TractProjectCreateServiceImpl">
+	</bean>
+
+	<!-- 跟踪审计标段安排管理 -->
+	<bean id="tractProjectArrangeServiceImpl"
+		class="com.audit.service.project.impl.TractProjectArrangeServiceImpl"></bean>
+
+	<!-- 跟踪审计月报管理 -->
+	<bean id="tractProjectMonthReportServiceImpl"
+		class="com.audit.service.project.impl.TractProjectMonthReportServiceImpl"></bean>
+
+	<!-- 跟踪审计清标管理 -->
+	<bean id="tractProjectQingBiaoServiceImpl"
+		class="com.audit.service.project.impl.TractProjectQingBiaoServiceImpl"></bean>
+		
+	<!-- 跟踪审计合同审核条款 -->
+	<bean id="proTractProjectContractService"
+		class="com.audit.service.project.impl.ProTractProjectContractServiceImpl"></bean>
+		
+    
+    <!-- 索赔 -->
+    <bean id="tractClaimIndemnityService"
+		class="com.audit.service.project.impl.TractClaimIndemnityServiceImpl"></bean>
+    
+    <!-- 政策性调整 -->
+    <bean id="tractPolicyChangeService"
+		class="com.audit.service.project.impl.TractPolicyChangeServiceImpl"></bean>
+    
+    <!-- 材料询价 -->
+    <bean id="projectDataEnquiryService"
+		class="com.audit.service.project.impl.ProjectDataEnquiryServiceImpl"></bean>
+
+    <!-- 其它管理 -->
+      <bean id="projectOtherManageService"
+		class="com.audit.service.project.impl.ProjectOtherManageServiceImpl"></bean>
+
+	<!-- 跟踪审计变更签证管理 -->
+	<bean id="tractProjectChangeCardServiceImpl"
+		class="com.audit.service.project.impl.TractProjectChangeCardServiceImpl"></bean>
+		
+	<!-- 资料交接 -->
+	<bean id="tractProjectDataTransferServiceImpl" class="com.audit.service.project.impl.TractProjectDataTransferServiceImpl"></bean>
+	
+	
+	<!--项目审计信息查询 -->
+	<bean id="commonPorjectExcelService" class="com.audit.service.common.impl.CommonPorjectExcelServiceImpl"></bean>
+</beans>

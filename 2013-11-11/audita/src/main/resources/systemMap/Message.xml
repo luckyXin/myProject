@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="messagemapxml">   
+  <typeAlias alias="MessageInfo" type="com.audit.entity.system.MessageInfo"/>   
+  
+   <!-- 分页查询消息数据 -->
+	  <select id="selectAllMessagepage" parameterClass="MessageInfo" resultClass="MessageInfo">   
+	     select id,messagetitle,messagecontent,messagetime,senduser,acceptuser,messagestate from sys_messageInfo where 1=1
+	      <dynamic prepend="and">
+			<isNotEmpty property="mehtodtype">
+				(senduser =#senduser# or acceptuser =#acceptuser#)
+			</isNotEmpty>
+			<isEmpty property="mehtodtype">
+			      <isNotEmpty property="senduser">
+				      senduser =#senduser#
+			      </isNotEmpty>
+			      <isNotEmpty property="acceptuser">
+				   acceptuser =#acceptuser#
+			     </isNotEmpty>
+			</isEmpty>
+		</dynamic>
+	    <dynamic prepend="and">
+			<isNotEmpty property="messagestate">
+				messagestate =#messagestate#
+			</isNotEmpty>
+		</dynamic>
+	
+		
+	    <dynamic prepend="order by">
+             <isNotEmpty property="filed">
+                       $filed$ $sort$
+             </isNotEmpty>
+              <isEmpty property="filed">
+                  messagetime desc
+             </isEmpty>
+         </dynamic>
+	  </select> 
+	  <!-- 查询消息总的记录条数 -->
+	   <select id="selectMessageAllcount" parameterClass="MessageInfo" resultClass="java.lang.Integer">   
+		   select count(*) from sys_messageInfo where 1=1
+		 
+		  <dynamic prepend="and">
+			<isNotEmpty property="mehtodtype">
+				(senduser =#senduser# or acceptuser =#acceptuser#)
+			</isNotEmpty>
+			<isEmpty property="mehtodtype">
+			      <isNotEmpty property="senduser">
+				      senduser =#senduser#
+			      </isNotEmpty>
+			      <isNotEmpty property="acceptuser">
+				   acceptuser =#acceptuser#
+			     </isNotEmpty>
+			</isEmpty>
+		</dynamic>
+		 
+	    <dynamic prepend="and">
+			<isNotEmpty property="messagestate">
+				messagestate =#messagestate#
+			</isNotEmpty>
+		</dynamic>
+	  </select> 
+	  <!-- 查询消息对象 -->
+	   <select id="selectmessageobject" parameterClass="java.lang.String" resultClass="MessageInfo">   
+	      select * from sys_messageInfo where id=#id#
+	  </select>
+	  
+	  
+	 <!--增加消息 -->
+	 <insert id="addmessage" parameterClass="MessageInfo">
+	   insert into  sys_messageInfo(id,messagetitle,messagecontent,messagetime,senduser,acceptuser,messagestate)
+	   values
+	   (#id#,#messagetitle#,#messagecontent#,#messagetime#,#senduser#,#acceptuser#,#messagestate#)
+	 </insert> 
+	 
+	 <!-- 修改消息为已阅读 -->
+	 <update id="updatemessagestate" parameterClass="MessageInfo">
+	     update sys_messageInfo set 
+	     messagestate='1'
+	     where id=#id#
+	 </update>
+	 
+	 <!-- 删除消息 -->
+	 <delete id="deletemessage"  parameterClass="java.lang.String">
+	   delete from sys_messageInfo where id=#id#
+	 </delete>
+	 
+	 <!-- 查询当前用户已发送消息总数 -->
+	   <select id="selectsendMessageAllcount" parameterClass="MessageInfo" resultClass="java.lang.Integer">   
+		   select count(*) from sys_messageInfo where 1=1
+		  <dynamic prepend="and">
+			<isNotEmpty property="messagestate">
+				messagestate =#messagestate#
+			</isNotEmpty>
+		</dynamic>
+	    <dynamic prepend="and">
+			<isNotEmpty property="senduser">
+				senduser =#senduser#
+			</isNotEmpty>
+		</dynamic>
+	  </select> 
+	  
+	  <!-- 查询当前用户接收的消息数量 -->
+	   <select id="selectjieshouMessageAllcount" parameterClass="MessageInfo" resultClass="java.lang.Integer">   
+		   select count(*) from sys_messageInfo where 1=1
+		  <dynamic prepend="and">
+			<isNotEmpty property="messagestate">
+				messagestate =#messagestate#
+			</isNotEmpty>
+		</dynamic>
+	    <dynamic prepend="and">
+			<isNotEmpty property="acceptuser">
+				acceptuser =#acceptuser#
+			</isNotEmpty>
+		</dynamic>
+	  </select> 
+	  
+	  <!-- 查询前5条消息 -->
+	   <select id="selecttopmessage" parameterClass="java.lang.String"  resultClass="MessageInfo">   
+	       select * from sys_messageInfo where acceptuser=#id# and messagestate='0'  order by messagetime desc
+	   </select>
+ </sqlMap>   
+
