@@ -1642,10 +1642,7 @@ public class MainEmployeeAuditServiceImpl implements IMainEmployeeAuditService {
 								"updateIdeaNoteStateComplete", mainAuditId);
 
 						// 征求意见稿完成，生成审计报告
-						iWorkFlowComponent
-								.changeWorkFlow(
-										id,
-										PropertiesGetValue
+						iWorkFlowComponent.changeWorkFlow(id,PropertiesGetValue
 												.getContextProperty("Flow.AreaLeaderAudit.agree"),
 										userAccount);
 					} else {
