@@ -13,9 +13,8 @@ public class PropertiesGetValue extends PropertyPlaceholderConfigurer {
 	private static Map<String, Object> propertiesMap;
 
 	@Override
-	protected void processProperties(
-			ConfigurableListableBeanFactory beanFactoryToProcess,
-			Properties props) throws BeansException {
+	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props)
+			throws BeansException {
 
 		super.processProperties(beanFactoryToProcess, props);
 

@@ -26,9 +26,8 @@ public class AuditStringUtils extends StringUtils {
 	 * "yyyy-MM-dd"类型
 	 */
 	public final static String DATE_YYYYMMMDD = "yyyy-MM-dd";
-	
-	private static final int DEF_DIV_SCALE = 3; 
 
+	private static final int DEF_DIV_SCALE = 3;
 
 	/**
 	 * List 转换为 String 已","进行分割
@@ -334,8 +333,8 @@ public class AuditStringUtils extends StringUtils {
 				if (!filepath.exists()) {
 					filepath.mkdir();
 				}
-				File filePath = new File(request.getSession().getServletContext()
-						.getRealPath(uploadPath + "/" + newFileName));
+				File filePath = new File(request.getSession().getServletContext().getRealPath(
+						uploadPath + "/" + newFileName));
 				/**
 				 * 文件开始上传到服务器上
 				 */
@@ -401,51 +400,41 @@ public class AuditStringUtils extends StringUtils {
 		}
 		return day;
 	}
-	
-	
-	public static String parseMoney(String str1) {   
-	     int len=str1.length(); 
-	    int k = 0; 
-	    int m = 0; 
-	    int dot = 0; 
-	    int start = 0; 
-	    String str_dot=""; 
-	    String str_start=""; 
-	    for(k=1;k<len;k++) 
-	    { 
-	        if(str1.substring(k,k+1).equals(".")) 
-	         { 
-	                  dot=k+1;                 
-	                  break; 
-	             } 
-	    } 
-	    start=(dot-1)%DEF_DIV_SCALE; 
-	    if(start==0) 
-	    { 
-	      str_start=""; 
-	    } 
-	    else 
-	    { 
-	           str_start=str1.substring(0,start)+","; 
-	    } 
-	    m=0; 
-	    for(k=start;k<dot;k+=DEF_DIV_SCALE) 
-	    { 
-	        str_start+=str1.substring(k,k+DEF_DIV_SCALE)+","; 
-	        m++; 
-	    } 
-	    if(start==0) 
-	    { 
-	        str_start=str_start.substring(0,dot+m-3); 
-	    } 
-	    else 
-	    {    
-	        str_start=str_start.substring(0,dot+m-2); 
-	    } 
-	    str_dot=str1.substring(dot,len); 
-	    str1=str_start+"."+str_dot; 
 
-	return str1; 
+	public static String parseMoney(String str1) {
+		int len = str1.length();
+		int k = 0;
+		int m = 0;
+		int dot = 0;
+		int start = 0;
+		String str_dot = "";
+		String str_start = "";
+		for (k = 1; k < len; k++) {
+			if (str1.substring(k, k + 1).equals(".")) {
+				dot = k + 1;
+				break;
+			}
+		}
+		start = (dot - 1) % DEF_DIV_SCALE;
+		if (start == 0) {
+			str_start = "";
+		} else {
+			str_start = str1.substring(0, start) + ",";
+		}
+		m = 0;
+		for (k = start; k < dot; k += DEF_DIV_SCALE) {
+			str_start += str1.substring(k, k + DEF_DIV_SCALE) + ",";
+			m++;
+		}
+		if (start == 0) {
+			str_start = str_start.substring(0, dot + m - 3);
+		} else {
+			str_start = str_start.substring(0, dot + m - 2);
+		}
+		str_dot = str1.substring(dot, len);
+		str1 = str_start + "." + str_dot;
+
+		return str1;
 	}
 
 }

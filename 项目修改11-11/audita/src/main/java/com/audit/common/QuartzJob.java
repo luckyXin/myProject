@@ -37,11 +37,11 @@ public class QuartzJob {
 
 			// 获取超过三天的项目总数
 			for (MyNoCompleteWorkInfo myNoCompleteWorkInfo : list) {
-				long day = AuditStringUtils.twoDateSubtract(myNoCompleteWorkInfo.getStartTime(),date);
+				long day = AuditStringUtils.twoDateSubtract(myNoCompleteWorkInfo.getStartTime(), date);
 				// 超过七天的项目跳过法制科
 				if (day >= 7) {
-					iWorkFlowComponent.changeWorkFlow(myNoCompleteWorkInfo.getId(),
-							PropertiesGetValue.getContextProperty("Flow.areaLeaderAudit.state"), "system");
+					iWorkFlowComponent.changeWorkFlow(myNoCompleteWorkInfo.getId(), PropertiesGetValue
+							.getContextProperty("Flow.areaLeaderAudit.state"), "system");
 				}
 			}
 		} catch (ParseException e) {
@@ -49,7 +49,7 @@ public class QuartzJob {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		// 删除缓存文件
 	}
 }
