@@ -123,7 +123,7 @@ public class AuditDocumentComponentImpl implements IAuditDocumentComponent {
 		
 		String wordUrl = masterplateUrl + "/" + name;
 		// 启动word
-		ActiveXComponent app = new ActiveXComponent("Word.Application"); 
+		ActiveXComponent app = new ActiveXComponent("Word.Application");
 		try {
 			// 设置word不可见
 			app.setProperty("Visible", new Variant(false));
