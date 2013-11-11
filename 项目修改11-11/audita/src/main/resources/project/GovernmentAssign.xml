@@ -1,0 +1,620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="governmentAssignxml">
+
+	<typeAlias alias="ProGovernmentAssign"
+		type="com.audit.entity.project.ProGovernmentAssign" />
+
+	<!-- 分页查询的动态sql -->
+	<select id="selectgovernmentassignpage" parameterClass="ProGovernmentAssign"
+		resultClass="ProGovernmentAssign">
+		select id,reportBatch,SUBSTRING(CONVERT(varchar,reportTime, 120),0,12)
+		as reportTime,assignCode,SUBSTRING(CONVERT(varchar,assignTime,
+		120),0,12) as assignTime,state from
+		pro_governmentAssign where 1=1
+		<dynamic prepend="and">
+			<isNotEmpty property="reportBatch">
+				reportBatch like '%$reportBatch$%'
+			</isNotEmpty>
+		</dynamic>
+		<dynamic prepend="and">
+			<isNotEmpty property="assignCode">
+				assignCode like '%$assignCode$%'
+			</isNotEmpty>
+		</dynamic>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by currenttime desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询总的记录条数 -->
+	<select id="selectgovernmentassigncount" parameterClass="ProGovernmentAssign"
+		resultClass="java.lang.Integer">
+		select count(*) from pro_governmentAssign where 1=1
+		<dynamic prepend="and">
+			<isNotEmpty property="reportBatch">
+				reportBatch like '%$reportBatch$%'
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 获取政府交办最大ID -->
+	<select id="getGovernmentAssignMaxId" resultClass="java.lang.Integer">
+		SELECT
+		MAX(SUBSTRING
+		(id,4,len(id))) FROM dbo.pro_governmentAssign
+	</select>
+
+	<insert id="addGovermentAssign" parameterClass="com.audit.entity.project.ProGovernmentAssign">
+		INSERT INTO
+		dbo.pro_governmentAssign
+		(id
+		,reportBatch
+		,reportTime
+		,state
+		,currenttime)
+		VALUES
+		(#id#
+		,#reportBatch#
+		,#reportTime#
+		,'0'
+		,getDate())
+	</insert>
+
+	<!-- 交办项目总数 -->
+	<select id="getAssignProjectCount" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_assignRelate t1 WHERE
+		t1.governmentAssignId = #governmentId#
+	</select>
+
+	<select id="getAssignProject" parameterClass="com.audit.entity.project.ProGovernmentAssign"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$ id,datapreno, projectName, sentAmount,
+		datapreTime,state,ownerName
+		FROM(
+		SELECT
+		t2.id,t2.datapreno,t2.projectName,t2.sentAmount,t2.datapretime as
+		datapreTime,t2.state, t3.ownerName FROM
+		dbo.pro_assignRelate t1
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t2
+		ON t1.projectId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t2.proownerid = t3.id
+		WHERE
+		t1.governmentAssignId =
+		#id#
+		AND
+		t2.state = '0'
+		) t1
+		WHERE (id not
+		in(SELECT TOP
+		($pagesize$*($pageno$ - 1)) id
+		FROM(SELECT t1.id as id
+		FROM
+		dbo.pro_assignRelate t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.projectId = t2.id
+		WHERE t1.governmentAssignId =
+		#id#
+		AND
+		t2.state =
+		'0') t
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by datapreTime desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by datapreTime desc
+	    </isEmpty>
+	</select>
+
+	<!-- 添加政府交办关联 -->
+	<insert id="addGovermentAssignProject" parameterClass="com.audit.entity.project.ProGoverMentProject">
+		INSERT
+		INTO dbo.pro_assignRelate
+		(id
+		,projectId
+		,governmentAssignId)
+		VALUES
+		(#id#
+		,#projectId#
+		,#governmentAssignId#)
+	</insert>
+
+	<!-- 删除政府交办关联项目 -->
+	<delete id="delGovermentAssignProject" parameterClass="com.audit.entity.project.ProGoverMentProject">
+		DELETE
+		FROM dbo.pro_assignRelate
+		WHERE
+		governmentAssignId=#governmentAssignId#
+		<isNotEmpty property="projectId">
+			AND projectId = #projectId#
+		</isNotEmpty>
+	</delete>
+
+	<!-- 删除政府交办信息 -->
+	<delete id="deleteGovermentAssignInfo" parameterClass="java.lang.String">
+		DELETE
+		FROM dbo.pro_governmentAssign
+		WHERE
+		id = #id#
+	</delete>
+
+	<!-- 获取政府交办信息 -->
+	<select id="getProGovernmentAssignById" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProGovernmentAssign">
+		SELECT
+		distinct t1.id,t1.reportBatch,t1.reportTime,t1.assignCode,t1.assignTime,t1.state
+		FROM
+		dbo.pro_governmentAssign t1
+		LEFT JOIN
+		dbo.pro_fileBelongRelate t2
+		ON t1.id = t2.belongToId
+		WHERE t1.id = #id#
+	</select>
+	
+	
+	<!-- 查询所有政府交办信息 -->
+	<select id="selectProGovernmentAllAssign" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProGovernmentAssign">
+		select * from pro_governmentAssign  order by id
+	</select>
+
+	<update id="updateAssignInfo" parameterClass="com.audit.entity.project.ProGovernmentAssign">
+		UPDATE
+		dbo.pro_governmentAssign
+		SET
+		assignCode = #assignCode#
+		,assignTime = #assignTime#
+		,reportBatch=#reportBatch#
+		,reportTime=#reportTime#
+		
+		WHERE
+		id = #id#
+	</update>
+
+	<select id="getAllAssignProject" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT
+		t1.projectId as id
+		FROM
+		dbo.pro_assignRelate t1
+		WHERE
+		t1.governmentAssignId = #id#
+	</select>
+
+	<select id="getCompleteProjectInfoCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT
+		count(1) FROM dbo.pro_governmentAssign t1
+		LEFT JOIN
+		dbo.pro_assignRelate t2
+		ON t1.id = t2.governmentAssignId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		WHERE t2.projectId is
+		not null
+		AND t1.assignCode is not null
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<select id="getCompleteProjectInfo" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$ id,datapreno, projectName, ownerName, sentAmount,
+		datapreTime,
+		assignState,reportBatch FROM (
+		SELECT
+		t1.id,t3.datapreno,t3.projectName,t4.ownerName,t3.sentAmount,t3.datapretime as
+		datapreTime, '1' as
+		assignState,t1.reportBatch
+		FROM dbo.pro_governmentAssign t1
+		LEFT
+		JOIN
+		dbo.pro_assignRelate t2
+		ON t1.id = t2.governmentAssignId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		WHERE t2.projectId is
+		not null
+		AND t1.assignCode is not null
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t WHERE (id not in (
+		SELECT
+		TOP
+		($pagesize$*($pageno$ - 1)) t1.id as id
+		FROM dbo.pro_governmentAssign t1
+		LEFT
+		JOIN
+		dbo.pro_assignRelate t2
+		ON
+		t1.id = t2.governmentAssignId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t2.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid =
+		t4.id
+		WHERE t2.projectId is
+		not null
+		AND t1.assignCode is not null
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by datapreTime desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by datapreTime desc
+	    </isEmpty>
+	</select>
+
+	<select id="getAllAssignProjectInfoCount" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM (
+		SELECT
+		distinct(t1.id)
+		FROM
+		dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id =
+		t4.projectDateId
+		AND
+		t4.userAccount =
+		#userAccount#
+		AND t4.module = 'M016'
+		WHERE
+		t1.state = '0'
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT
+		distinct(t3.id) FROM
+		dbo.pro_governmentAssign t1
+		LEFT
+		JOIN
+		dbo.pro_assignRelate t2
+		ON t1.id =
+		t2.governmentAssignId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		WHERE
+		t2.projectId is
+		not null
+		AND t1.assignCode is not null
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+	</select>
+	
+	<select id="findArrangeProjectAllCountAssign" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t1.proownerid = t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND t4.userAccount =
+		#userAccount#
+		AND t4.module = 'M016'
+		left join pro_assignRelate t5
+		on  t1.id=t5.projectId 
+		WHERE
+		t1.state = '0'
+		AND t4.state = '0'
+		and t5.governmentAssignId is null
+		<isNotEmpty property="ownerId">
+			AND t3.id=#ownerId#
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+	
+	<select id="findArrangeProjectAssign" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT top $pagesize$ id,datapreno,projectName,constructname as
+		constructUnit,sentAmount,ownerName,state as
+		dateState,SUBSTRING(CONVERT(varchar,
+		datapreTime, 120),0,12) as
+		datapreTime, isArrangement,assignState FROM (
+		SELECT
+		t1.id,t1.datapreno,t1.projectName,t1.sentAmount,t1.constructId as constructname ,t3.ownerName,t1.state,t1.datapretime,t1.isArrangement,'0'
+		as
+		assignState
+		FROM
+		dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id =
+		t4.projectDateId
+		AND
+		t4.userAccount = #userAccount#
+		AND t4.module = 'M016'
+		left join pro_assignRelate t5
+		on  t1.id=t5.projectId 
+		WHERE
+		t1.state = '0'
+		AND t4.state = '0'
+		and t5.governmentAssignId is null
+		<isNotEmpty property="ownerId">
+			AND t3.id=#ownerId#
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t5
+		WHERE (id not IN
+		(SELECT TOP($pagesize$*($pageno$ - 1)) t1.id FROM
+		dbo.pro_datapreinfo
+		t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND
+		t4.userAccount =
+		#userAccount#
+		AND t4.module = 'M016'
+		left join pro_assignRelate t5
+		on  t1.id=t5.projectId 
+		WHERE
+		t1.state = '0'
+		AND t4.state = '0'
+		and t5.governmentAssignId is null
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+	
+
+	<select id="getAllAssignProjectInfo" parameterClass="com.audit.entity.project.ArrangeProject"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT TOP $pagesize$ id,datapreno, projectName, ownerName, sentAmount,
+		datapreTime,reportBatch,
+		assignState FROM (SELECT
+		t1.id,t1.datapreno,t1.projectName,t1.sentAmount,t1.constructId,t3.ownerName,t1.state,t1.datapretime,t1.isArrangement,'0'
+		as assignState,t6.reportBatch
+		FROM
+		dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id =
+		t4.projectDateId
+		AND
+		t4.userAccount = #userAccount#
+		AND t4.module = 'M016'
+		left join pro_assignRelate t5
+		on t1.id=t5.projectId 
+		left join pro_governmentAssign t6
+		on  t6.id =t5.governmentAssignId 
+		WHERE
+		t1.state = '0'
+		<isNotEmpty property="ownerName">
+			AND t3.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT
+		t3.id,t3.datapreno,t3.projectName,t3.sentAmount,'1' as
+		constructname,t4.ownerName,t3.state,t3.datapretime as
+		datapreTime,t3.isArrangement ,'1' as assignState,t1.reportBatch FROM
+		dbo.pro_governmentAssign t1
+		LEFT
+		JOIN
+		dbo.pro_assignRelate t2
+		ON t1.id =
+		t2.governmentAssignId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		WHERE
+		t2.projectId is
+		not null
+		AND t1.assignCode is not null
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t WHERE (id not in (
+		SELECT TOP ($pagesize$ * ($pageno$ - 1)) id FROM (
+		SELECT distinct(ID) FROM (
+		SELECT
+		t1.id,t1.datapreno,t1.projectName,t1.sentAmount,t1.constructId,t3.ownerName,t1.state,t1.datapretime,t1.isArrangement,'0'
+		as assignState
+		FROM
+		dbo.pro_datapreinfo t1
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t1.proownerid
+		= t3.id
+		Right JOIN
+		dbo.flowView_mywork t4
+		ON t1.id = t4.projectDateId
+		AND
+		t4.userAccount = #userAccount#
+		AND t4.module = 'M016'
+		WHERE
+		t1.state = '0'
+		union
+		SELECT
+		t3.id,t3.datapreno,t3.projectName,t3.sentAmount,'1' as
+		constructname,t4.ownerName,t3.state,t3.datapretime as
+		datapreTime,t3.isArrangement ,'1' as assignState FROM
+		dbo.pro_governmentAssign t1
+		LEFT
+		JOIN
+		dbo.pro_assignRelate t2
+		ON t1.id =
+		t2.governmentAssignId
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t2.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		WHERE
+		t2.projectId is
+		not null
+		AND t1.assignCode is not null
+		)t
+		) t
+		<dynamic prepend="order by">
+		<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	
+	</select>
+</sqlMap>
+

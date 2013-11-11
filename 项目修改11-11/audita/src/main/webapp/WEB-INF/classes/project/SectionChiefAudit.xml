@@ -1,0 +1,1840 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="SectionChiefAudit">
+
+	<!-- 查询科长没有完成审批的单项目总数 -->
+	<select id="findNoSectionChiefAuditSingleProjectCount"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT
+		count(1) FROM
+		dbo.pro_singleProjectArrange t1
+		inner JOIN
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		= t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<!-- 查询科长没有完成审批的单项目信息 -->
+	<select id="findNoSectionChiefAuditSingleProject"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="com.audit.entity.project.AuditInfo">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM
+		(
+		SELECT
+		t1.id,t3.projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName
+		FROM
+		dbo.pro_singleProjectArrange t1
+		inner JOin dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		=
+		t3.id
+		LEFT JOIN dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) t1.id as id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		inner
+		JOin dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<!-- 查询科长已经完成审批的单项目总数 -->
+	<select id="findSectionChiefAuditSingleProjectCount"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT
+		count(1) FROM dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_singleProjectArrange t2
+		ON t1.projectDateId = t2.id
+		AND
+		t1.userAccount = #userAccount#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id
+		= t2.datapreId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId = t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT JOIN dbo.pro_intermediaryaudit t6
+		ON t2.id =
+		t6.arrangeId
+		LEFT JOIN dbo.pro_governmentEmployeeAudit t7
+		ON t2.id =
+		t7.projectId
+		WHERE t3.id is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t7.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t7.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<!-- 查询科长已经完成审批的单项目信息 -->
+	<select id="findSectionChiefAuditSingleProject" parameterClass="com.audit.entity.project.AuditInfo"
+		resultClass="com.audit.entity.project.AuditInfo">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM
+		(
+		SELECT
+		t2.id,t3.projectName,t4.intermediaryname as
+		intermediary,t5.ownerName,t6.username as mainAuditName
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_singleProjectArrange t2
+		ON t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t2.datapreId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id = t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) ta
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) t2.id as
+		id
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_singleProjectArrange
+		t2
+		ON t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t2.datapreId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id = t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="getAllEmployeeNameByArrangeId" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT t6.username FROM
+		dbo.pro_employeeArrangeRelate t1
+		LEFT JOIN dbo.sys_userinfo t6
+		ON t1.governmentEmployeeId= t6.id
+		WHERE
+		t1.projectArrangeId = #id#
+	</select>
+
+	<!-- 查询科长没有完成审批的打包项目总数 -->
+	<select id="findNoSectionChiefAuditPackProjectCount"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT count (distinct t1.id) FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN dbo.pro_packProjectRelate t7
+		ON t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t9
+		ON t1.id = t9.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t8
+		ON t1.id = t8.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t8.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t8.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<!-- 查询科长没有完成审批的打包项目信息 -->
+	<select id="findNoSectionChiefAuditPackProject" parameterClass="com.audit.entity.project.AuditInfo"
+		resultClass="com.audit.entity.project.AuditInfo">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM
+		(
+		SELECT
+		distinct t1.id,t1.packageName as
+		projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2 ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t9
+		ON t1.id = t9.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t8
+		ON t1.id = t8.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t8.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t8.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) t1.id as id
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t7
+		ON t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid =
+		t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t9
+		ON t1.id = t9.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t8
+		ON t1.id = t8.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t8.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t8.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="findSectionChiefAuditPackProjectCount"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT
+		count (distinct t1.id) FROM dbo.pro_sectionChiefAudit t1
+		LEFT
+		JOIN
+		dbo.pro_packProjectArrange t2
+		ON t1.projectDateId = t2.id
+		AND
+		t1.userAccount = #userAccount#
+		LEFT JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t7.projectPackId = t2.id
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t7.projectId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.pro_intermediaryaudit t9
+		ON t2.id = t9.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t8
+		ON t2.id = t8.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t8.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t8.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+	</select>
+
+	<select id="findSectionChiefAuditPackProject" parameterClass="com.audit.entity.project.AuditInfo"
+		resultClass="com.audit.entity.project.AuditInfo">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM
+		(
+		SELECT
+		distinct t2.id,t2.packageName as projectName,t4.intermediaryname as
+		intermediary,t5.ownerName,t6.username as mainAuditName
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_packProjectArrange t2
+		ON
+		t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t7.projectPackId = t2.id
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t7.projectId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t9
+		ON t2.id = t9.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t8
+		ON t2.id = t8.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t8.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t8.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		)t
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) t2.id as id
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_packProjectArrange t2
+		ON t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t7.projectPackId = t2.id
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t7.projectId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t9
+		ON t2.id = t9.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t8
+		ON t2.id = t8.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t8.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t8.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="findSectionChiefAuditAllProjectCount"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT count(id) FROM (
+		SELECT
+		t2.id
+		as id,t2.packageName as
+		projectName,t4.intermediaryname as
+		intermediary,t5.ownerName,t6.username as mainAuditName
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_packProjectArrange t2
+		ON
+		t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t7.projectPackId = t2.id
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t7.projectId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		union
+		SELECT
+		t2.id,t3.projectName,t4.intermediaryname as
+		intermediary,t5.ownerName,t6.username as mainAuditName
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_singleProjectArrange t2
+		ON t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t2.datapreId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+	</select>
+
+	<select id="findSectionChiefAuditAllProject" parameterClass="com.audit.entity.project.AuditInfo"
+		resultClass="com.audit.entity.project.AuditInfo">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM (
+		SELECT
+		t2.id
+		as id,t2.packageName as projectName,t4.intermediaryname as
+		intermediary,t5.ownerName,t6.username as mainAuditName
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_packProjectArrange t2
+		ON
+		t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t7.projectPackId = t2.id
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t7.projectId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT
+		t2.id,t3.projectName,t4.intermediaryname as
+		intermediary,t5.ownerName,t6.username as mainAuditName
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_singleProjectArrange t2
+		ON t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t2.datapreId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+		WHERE (id not in (
+		SELECT top($pagesize$*($pageno$ - 1)) id
+		FROM
+		(SELECT t2.id FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_packProjectArrange t2
+		ON t1.projectDateId = t2.id
+		LEFT JOIN
+		dbo.pro_packProjectRelate t7
+		ON
+		t7.projectPackId = t2.id
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t7.projectId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT
+		t2.id
+		FROM
+		dbo.pro_sectionChiefAudit t1
+		LEFT JOIN
+		dbo.pro_singleProjectArrange t2
+		ON t1.projectDateId = t2.id
+		LEFT
+		JOIN
+		dbo.pro_datapreinfo t3
+		ON t3.id =
+		t2.datapreId
+		LEFT JOIN
+		dbo.sys_intermediaryagency t4
+		ON
+		t2.intermediaryId
+		= t4.id
+		LEFT JOIN
+		dbo.sys_projectowner t5
+		ON
+		t3.proownerid = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t2.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t2.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t2.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t5.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t2.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) ta
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="findNoSectionChiefAuditAllProjectCount"
+		parameterClass="com.audit.entity.project.AuditInfo" resultClass="java.lang.Integer">
+		SELECT count(ID) FROM
+		(
+		SELECT
+		t1.id FROM
+		dbo.pro_singleProjectArrange t1
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		= t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT distinct t1.id FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN
+		dbo.pro_packProjectRelate t7
+		ON t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId = t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) t
+	</select>
+
+	<select id="findNoSectionChiefAuditAllProject" parameterClass="com.audit.entity.project.AuditInfo"
+		resultClass="com.audit.entity.project.AuditInfo">
+		SELECT top $pagesize$
+		id,projectName,ownerName,intermediary,mainAuditName FROM (
+		SELECT
+		t1.id,t3.projectName,t4.ownerName,t5.intermediaryname as intermediary,
+		t6.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		inner
+		JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		= t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT
+		distinct t1.id,t1.packageName as
+		projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN dbo.pro_packProjectRelate t7
+		ON
+		t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON
+		t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid =
+		t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		)ta
+		WHERE ((id not in (SELECT top($pagesize$*($pageno$ - 1)) id FROM
+		(SELECT t1.id,t3.projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,
+		t6.username as mainAuditName FROM
+		dbo.pro_singleProjectArrange t1
+		inner
+		JOin
+		dbo.flowView_mywork t2
+		ON
+		t1.datapreId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t1.datapreId
+		=
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT
+		JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t3.projectName like
+			'%$projectName$%'
+        </isNotEmpty>
+		union
+		SELECT
+		distinct t1.id,t1.packageName as
+		projectName,t4.ownerName,t5.intermediaryname as
+		intermediary,t6.username as mainAuditName
+		FROM
+		dbo.pro_packProjectArrange t1
+		LEFT
+		JOIN dbo.pro_packProjectRelate t7
+		ON
+		t1.id = t7.projectPackId
+		inner JOin
+		dbo.flowView_mywork t2
+		ON
+		t7.projectId = t2.projectDateId
+		AND
+		t2.userAccount = #userAccount#
+		AND
+		t2.module = #moduleId#
+		LEFT JOIN
+		dbo.pro_datapreinfo t3
+		ON t7.projectId =
+		t3.id
+		LEFT JOIN
+		dbo.sys_projectowner t4
+		ON t3.proownerid = t4.id
+		LEFT
+		JOIN
+		dbo.sys_intermediaryagency t5
+		ON t1.intermediaryId = t5.id
+		LEFT JOIN
+		dbo.sys_userinfo t6
+		ON t1.mainAuditId = t6.id
+		LEFT JOIN
+		dbo.pro_intermediaryaudit t8
+		ON t1.id =
+		t8.arrangeId
+		LEFT JOIN
+		dbo.pro_governmentEmployeeAudit t9
+		ON t1.id = t9.projectId
+		WHERE t3.id
+		is not null
+		<isEqual property="sectionChiefAuditType" compareValue="0">
+			AND
+			t9.id is null
+		</isEqual>
+		<isEqual property="sectionChiefAuditType" compareValue="1">
+			AND
+			t9.id is not null
+		</isEqual>
+		<isNotEmpty property="ownerName">
+			AND t4.ownerName like '%$ownerName$%'
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.packageName like
+			'%$projectName$%'
+        </isNotEmpty>
+		) ta
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+		)))
+		<dynamic prepend="order by">
+			<isNotEmpty property="filed">
+				$filed$ $sort$
+             </isNotEmpty>
+		</dynamic>
+		<isEmpty property="filed">
+			order by id desc
+	    </isEmpty>
+	</select>
+
+	<select id="getProjectBaseInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ArrangeProject">
+		SELECT t1.id,t2.projectName,t2.sentAmount,t3.ownerName
+		FROM dbo.pro_singleProjectArrange t1
+		LEFT JOIN dbo.pro_datapreinfo t2
+		ON t1.datapreId = t2.id
+		LEFT JOIN dbo.sys_projectowner t3
+		ON
+		t2.proownerid = t3.id
+		WHERE t1.id = #id#
+		union
+		SELECT
+		t1.id,t1.packageName as projectName,t1.sendAmount,t2.ownerName FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.sys_projectowner t2
+		ON
+		t1.ownerId = t2.id
+		WHERE t1.id = #id#
+	</select>
+
+	<select id="getIntermediaryAudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProIntermediaryAudit">
+		SELECT
+		id
+		,auditmoney
+		,cutmoney
+		,auditoktime as auditTime
+		,deferday
+		,overday
+		,remark
+		,auditlv
+		,isconfirm
+		,userAccount
+		,(
+		SELECT
+		t2.intermediaryname FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.sys_intermediaryagency t2
+		ON
+		t1.intermediaryId = t2.id
+		WHERE t1.id =
+		#id#
+		union
+		SELECT
+		t2.intermediaryname FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.sys_intermediaryagency t2
+		ON t1.intermediaryId = t2.id
+		WHERE t1.id =
+		#id#
+		) as intermediaryName
+		FROM
+		dbo.pro_intermediaryaudit
+		WHERE
+		arrangeId =
+		#id#
+	</select>
+
+	<select id="getPackIntermediaryAudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProIntermediaryAudit">
+		SELECT
+		arrangeId as id
+		,sum(convert(decimal(18,2),auditmoney)) as auditmoney
+		,sum(convert(decimal(18,2),cutmoney)) as cutmoney
+		,min(auditoktime) as
+		auditTime
+		,userAccount
+		,remark
+		,auditlv
+		,(
+		SELECT
+		t2.intermediaryname FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN
+		dbo.sys_intermediaryagency t2
+		ON
+		t1.intermediaryId = t2.id
+		WHERE t1.id =
+		#id#
+		union
+		SELECT
+		t2.intermediaryname FROM dbo.pro_singleProjectArrange
+		t1
+		LEFT JOIN
+		dbo.sys_intermediaryagency t2
+		ON t1.intermediaryId = t2.id
+		WHERE t1.id =
+		#id#
+		) as intermediaryName
+		FROM
+		dbo.pro_intermediaryaudit
+		WHERE
+		arrangeId =
+		#id#
+		GROUP by arrangeId,userAccount
+	</select>
+
+	<select id="getGovermentEmployeeAudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.GovermentEmployeeAudit">
+		SELECT
+		id
+		,auditMoney
+		,reduceMoney
+		,auditStartTime
+		,auditEndTime
+		,auditDayCount
+		,auditRemark
+		FROM
+		dbo.pro_governmentEmployeeAudit
+		WHERE projectId = #id#
+	</select>
+
+	<select id="getPackGovermentEmployeeAudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.GovermentEmployeeAudit">
+		SELECT
+		sum(convert(decimal(18,2),auditMoney)) as auditMoney
+		,sum(convert(decimal(18,2),reduceMoney)) as reduceMoney
+		,min(auditStartTime) as auditStartTime
+		,max(auditEndTime) as
+		auditEndTime
+		,auditDayCount,
+		auditRemark
+		FROM
+		dbo.pro_governmentEmployeeAudit
+		Group By
+		projectId,auditDayCount
+		having projectId = #id#
+	</select>
+
+	<insert id="addSectionChiefAudit" parameterClass="com.audit.entity.project.SectionChiefAuditBaseInfo">
+		INSERT INTO
+		dbo.pro_sectionChiefAudit
+		(id
+		,projectDateId
+		,remark
+		,userAccount
+		,passState
+		,isSubmit
+		,createTime)
+		VALUES
+		(#id#
+		,#projectDateId#
+		,#remark#
+		,#userAccount#
+		,#passState#
+		,#isSubmit#
+		,getdate())
+	</insert>
+
+	<select id="getBaseProejctIds" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT t2.id
+		FROM
+		dbo.pro_singleProjectArrange t1
+		LEFT JOIN
+		dbo.pro_datapreinfo t2
+		ON
+		t1.datapreId = t2.id
+		LEFT JOIN
+		dbo.sys_projectowner t3
+		ON
+		t2.proownerid =
+		t3.id
+		WHERE t1.id = #id#
+		union
+		SELECT
+		t2.projectId as id FROM
+		dbo.pro_packProjectArrange
+		t1
+		LEFT JOIN
+		dbo.pro_packProjectRelate t2
+		ON
+		t1.id = t2.projectPackId
+		WHERE t1.id =
+		#id#
+	</select>
+
+	<update id="updateIntermediaryAuditSubmitState" parameterClass="java.lang.String">
+		UPDATE dbo.pro_intermediaryaudit
+		SET
+		isconfirm = '0'
+		WHERE id = #id#
+	</update>
+
+	<update id="updateEmploeeAuditSubmitState" parameterClass="java.lang.String">
+		UPDATE dbo.pro_governmentEmployeeAudit
+		SET
+		submitState = '0'
+		WHERE id =
+		#id#
+	</update>
+
+	<update id="updateArrangeEmploeeAuditSubmitState"
+		parameterClass="java.lang.String">
+		UPDATE dbo.pro_employeeArrangeRelate
+		SET
+		auditState = '0'
+		WHERE projectArrangeId = #id#
+	</update>
+
+	<select id="getPackIntermediaryAuditByArrangeId" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ProIntermediaryAudit">
+		SELECT id FROM dbo.pro_intermediaryaudit WHERE
+		arrangeId =
+		#arrangeId#
+	</select>
+
+
+	<update id="updateSectionChiefAudit" parameterClass="com.audit.entity.project.SectionChiefAuditBaseInfo">
+		UPDATE
+		dbo.pro_sectionChiefAudit
+		SET
+		remark = #remark#
+		,passState = #passState#
+		,isSubmit = #isSubmit#
+		,createTime = getdate()
+		WHERE id = #id#
+	</update>
+
+	<select id="getSectionChiefAuditBaseInfo" parameterClass="com.audit.entity.project.SectionChiefAuditBaseInfo"
+		resultClass="com.audit.entity.project.SectionChiefAuditBaseInfo">
+		SELECT
+		id
+		,projectDateId
+		,remark
+		,userAccount
+		,passState
+		,isSubmit
+		,createTime
+		FROM
+		dbo.pro_sectionChiefAudit
+		WHERE
+		id = (
+		SELECT
+		id
+		FROM
+		dbo.pro_sectionChiefAudit
+		WHERE
+		userAccount =
+		#userAccount#
+		AND
+		projectDateId = #projectDateId#
+		AND createTime = (SELECT
+		max(createTime) FROM
+		dbo.pro_sectionChiefAudit
+		WHERE
+		userAccount =
+		#userAccount#
+		AND
+		projectDateId = #projectDateId#
+		)
+		)
+	</select>
+
+	<select id="getLowSectionChiefAuditBaseInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.SectionChiefAuditBaseInfo">
+		SELECT
+		id
+		,projectDateId
+		,remark
+		,userAccount
+		,passState
+		,isSubmit
+		,createTime
+		FROM
+		dbo.pro_legalSectionChiefAudit
+		WHERE
+		projectDateId = #projectDateId#
+		AND
+		createTime = (
+		SELECT
+		max(createTime)
+		FROM
+		dbo.pro_legalSectionChiefAudit
+		WHERE
+		projectDateId = #projectDateId#
+		)
+	</select>
+
+	<select id="getAreaLeaderAuditBaseInfoInSection" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.SectionChiefAuditBaseInfo">
+		SELECT
+		id
+		,projectDateId
+		,remark
+		,userAccount
+		,passState
+		,isSubmit
+		,createTime
+		FROM
+		dbo.pro_areaLeaderAudit
+		WHERE
+		projectDateId =
+		#projectDateId#
+		AND
+		createTime = (
+		SELECT
+		max(createTime)
+		FROM
+		dbo.pro_areaLeaderAudit
+		WHERE
+		projectDateId = #projectDateId#
+		)
+	</select>
+
+	<select id="getGovernmentEmployeeOfUserAccount" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		SELECT t3.userAccount FROM
+		dbo.pro_employeeArrangeRelate t1
+		LEFT JOIN dbo.sys_userinfo t3
+		ON t1.governmentEmployeeId = t3.id
+		WHERE
+		projectArrangeId in (
+		SELECT id
+		FROM dbo.pro_singleProjectArrange
+		WHERE
+		datapreId = #id#
+		union
+		SELECT t1.id FROM
+		dbo.pro_packProjectArrange t1
+		LEFT JOIN dbo.pro_packProjectRelate t2
+		ON
+		t1.id = t2.projectPackId
+		WHERE
+		t2.projectId = #id#
+		)
+	</select>
+
+	<update id="updateLowSectionChiefAuditState" parameterClass="java.lang.String">
+		UPDATE dbo.pro_legalSectionChiefAudit SET isSubmit = '0' WHERE
+		projectDateId = #projectDateId#
+	</update>
+
+
+	<!-- 查询科长审核信息 -->
+	<select id="selectkezhangaudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ResultAuditInfo">
+		select top(1)userAccount as username,passState as
+		isagree,createTime as audittime,remark from pro_sectionChiefAudit
+		where projectDateId=#id# order by createTime desc
+	</select>
+
+	<!-- 查询法制科长审核信息 -->
+	<select id="selectfazhikezhangaudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ResultAuditInfo">
+		select top(1)userAccount as username,passState as
+		isagree,createTime as audittime,remark from pro_legalSectionChiefAudit
+		where projectDateId=#id# order by createTime desc
+	</select>
+
+	<!-- 查询法制分管审核信息 -->
+	<select id="selectfazhifenguanaudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ResultAuditInfo">
+		select top(1)userAccount as username,passState as
+		isagree,createTime as audittime,remark from pro_legalAreaLeaderAudit
+		where projectDateId=#id# order by createTime desc
+	</select>
+	
+	<!-- 查询分管领导审核信息 -->
+    	<select id="selectfenguanaudit" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.ResultAuditInfo">
+		select top(1)userAccount as username,passState as
+		isagree,createTime as audittime,remark from pro_areaLeaderAudit
+		where projectDateId=#id# order by createTime desc
+	</select>
+	<!-- 检查打包项目是否超过20万 -->
+	<select id="checkPackSentMoney" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+	SELECT COUNT(1) FROM dbo.pro_packProjectArrange t
+	LEFT JOIN
+	dbo.pro_packProjectRelate t1
+	ON t.id = t1.projectPackId
+	WHERE (SELECT
+	COUNT(1) FROM dbo.pro_datapreinfo t2 WHERE t2.id =
+	t1.projectId AND
+	t2.audittype = 'D032') =
+	(SELECT COUNT(1) FROM dbo.pro_packProjectRelate
+	WHERE projectPackId = t.id)
+	AND
+	convert(decimal(18,2),t.sendAmount) <![CDATA[>=]]>
+	200000.00
+	AND
+	t.id = #id#
+	</select>
+	
+	<select id="checkSingleSentMoney" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+	SELECT COUNT(1) FROM(
+	SELECT t1.id FROM dbo.pro_datapreinfo t
+	LEFT JOIN dbo.pro_singleProjectArrange t1
+	ON t.id = t1.datapreId
+	WHERE t.audittype = 'D032' OR convert(decimal(18,2),t.sentAmount) <![CDATA[<=]]>
+	200000.00
+	) t
+	WHERE id = #id#
+	</select>
+
+	<!-- 判断是否是200万以上的项目 -->
+	<select id="checkIsTwoMilonProject" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM dbo.pro_datapreinfo t
+		WHERE convert(decimal(18,2),t.sentAmount) <![CDATA[>=]]> 2000000.00
+		AND t.id = #id#
+	</select>
+	
+	
+</sqlMap>

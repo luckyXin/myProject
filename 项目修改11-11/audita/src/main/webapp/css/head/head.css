@@ -1,0 +1,54 @@
+body {
+	margin: 0px;
+	font-family: "宋体";
+}
+#head_bg {
+
+	height: 90px;
+	background: url(images/head_bg.jpg) repeat-x;
+}
+#head_bg .logo {
+
+	width: 870px;
+	height: 90px;
+}
+#menu {
+	height: 31px;
+	background-color: #E0ECFF;
+	/*background:url(images/menu_bg.jpg) repeat-x;*/
+	font-size: 12px;
+	line-height: 30px;
+}#menu .left .menu_ico {
+	margin-top: 7px;
+	float: left;
+	padding-left: 10px;
+}
+#menu .left .menu_txt {
+	float: left;
+	margin-right: 30px;
+	margin-left: 5px;
+}
+#menu .left {
+
+}
+#menu .right {
+	float: right;
+	padding-right: 10px;
+}
+#menu .right .menu_button01 {
+	background: url(images/button_01.jpg) no-repeat;
+	height: 23px;
+	width: 54px;
+	margin-top: 4px;
+	border-style: none;
+	cursor: pointer;
+	margin-right: 10px;
+}
+#menu .right .menu_button02 {
+	background: url(images/button_02.jpg) no-repeat;
+	height: 23px;
+	width: 54px;
+	margin-top: 4px;
+	border-style: none;
+	cursor: pointer;
+}

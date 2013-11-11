@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="DataCreateWordxml">
+
+   <typeAlias alias="Datapreinfo" type="com.audit.entity.project.Datapreinfo"/>
+    <typeAlias alias="DataWord" type="com.audit.entity.project.DataWord"/>
+    
+    <!-- 按政府交办查询施工企业 -->
+    <select id="selectConstructIdcreateWord" parameterClass="java.lang.String" resultClass="Datapreinfo">   
+	      select proownerid from pro_datapreinfo where id in
+	      ( select projectId from pro_assignRelate where governmentAssignId=#id#) 
+	      group by proownerid 
+	</select>
+	<!-- 查询政府交办的项目是决算还是跟踪 -->
+	 <select id="selectifaudittype" parameterClass="java.lang.String" resultClass="Datapreinfo">   
+	     select id,audittype from pro_datapreinfo where id in( select projectId from pro_assignRelate where governmentAssignId=#id#) 
+	</select>
+	
+	
+	  <select id="selectdatapreproNameWord" parameterClass="DataWord" resultClass="Datapreinfo">   
+	  select proownerid,projectName from pro_datapreinfo where id in(select projectId from pro_assignRelate where governmentAssignId=#governmentAssignId#) 
+	</select>
+	
+	
+</sqlMap>
+

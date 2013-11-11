@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE sqlMap 
+    PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+    "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="tractProjectArrange">
+
+
+	<!-- 获取跟踪项目下面的所有标段 -->
+	<select id="findTractProjectAllBiaoDuanById" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT
+		distinct
+		t.id,
+		t.projectId as _parentId,
+		t.biaoDuanName,
+		t.projectGaiKuang,
+		t.supervisorUtil,
+		t.buildManageUtil,
+		t.prospectUtil,
+		t.buildUtil,
+		t.designUtil,
+		t.constructUtil,
+		t.preAuditMoney,
+		t.zhongBiaoMoney,
+		t.reallyStartTime,
+		t.buildContent,
+		t.isArrange,
+		t1.projectName,
+		t2.ownerName,
+		t3.isPay,
+		t1.projectType,
+		t.dataTransferState,
+		t.qingBiaoState,
+		t5.username as mainAuditName,
+		t3.id as arrangeId,
+		t6.createTime as projectTransferStartTime,
+		t7.intermediaryname as intermediaryName
+		FROM dbo.pro_tractBiaoDuanCreate t
+		LEFT JOIN
+		dbo.pro_tractProjectAudit t1
+		ON t.projectId = t1.id
+		LEFT JOIN
+		dbo.sys_projectowner t2
+		ON t1.ownerId = t2.id
+		LEFT JOIN
+		dbo.pro_tractProjectArrange t3
+		ON t3.biaoDuanId = t.Id
+		LEFT JOIN dbo.pro_employeeArrangeRelate t4
+		ON t3.id = t4.projectArrangeId
+		LEFT JOIN dbo.sys_userinfo t5
+		ON t3.mainAuditId = t5.id
+		LEFT JOIN dbo.pro_tractProjectTransferData t6
+		ON t6.tractProjectId = t.id
+		LEFT JOIN dbo.sys_intermediaryagency t7
+		ON t3.intermediaryId  = t7.id 
+		WHERE 1 = 1
+		<isNotEmpty property="projectId">
+			AND t.projectId = #projectId#
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like '%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="constructUtil">
+			AND t.constructUtil like '%$constructUtil$%'
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND ownerId = #ownerName#
+		</isNotEmpty>
+		<isEqual property="isArrange" compareValue="0">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="isArrange" compareValue="1">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="0">
+		    AND (t.dataTransferState is null OR t.dataTransferState = '0')
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="1">
+		    AND t.dataTransferState = '1'
+		</isEqual>
+		<isNotEmpty property="employeeAuditId">
+			<isEqual property="auditIdentity" compareValue="0">
+			    AND (t3.mainAuditId = #employeeAuditId# OR t4.governmentEmployeeId =
+				#employeeAuditId#)
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="1">
+			    AND t3.mainAuditId = #employeeAuditId# 
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="2">
+			    AND t4.governmentEmployeeId = #employeeAuditId#
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="reallyStartTime">
+		     AND t.reallyStartTime <![CDATA[>=]]> #reallyStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="reallyEndTime">
+		     AND t.reallyStartTime <![CDATA[<=]]> #reallyEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="projectTransferStartTime">
+		    AND  t6.createTime <![CDATA[>=]]> #projectTransferStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="projectTransferEndTime">
+		    AND t6.createTime <![CDATA[<=]]> #projectTransferEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="intermediaryId">
+		    AND t7.id = #intermediaryId#
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取跟踪项目基础信息总数 -->
+	<select id="getTractProjectAllByBiaoDuanInfoCount"
+		parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="java.lang.Integer">
+		SELECT count(1) FROM dbo.pro_tractProjectAudit t1
+		LEFT JOIN dbo.sys_projectowner
+		t2
+		ON t1.ownerId = t2.id
+		WHERE t1.id in (SELECT distinct t.projectId FROM
+		dbo.pro_tractBiaoDuanCreate t
+		LEFT JOIN dbo.pro_tractProjectArrange t1
+		ON t.id = t1.biaoDuanId
+		LEFT JOIN dbo.pro_employeeArrangeRelate t2
+		ON t1.id = t2.projectArrangeId
+		LEFT JOIN dbo.pro_tractProjectTransferData t3
+		ON t3.tractProjectId = t.id
+		LEFT JOIN dbo.sys_intermediaryagency t7
+		ON t1.intermediaryId  = t7.id 
+		WHERE 1 = 1
+		<isEqual property="isArrange" compareValue="0">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="isArrange" compareValue="1">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="0">
+		    AND (t.dataTransferState is null OR t.dataTransferState = '0')
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="1">
+		    AND t.dataTransferState = '1'
+		</isEqual>
+		<isNotEmpty property="employeeAuditId">
+			<isEqual property="auditIdentity" compareValue="0">
+			    AND (t1.mainAuditId = #employeeAuditId# OR t2.governmentEmployeeId =
+				#employeeAuditId#)
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="1">
+			    AND t1.mainAuditId = #employeeAuditId# 
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="2">
+			    AND t2.governmentEmployeeId = #employeeAuditId#
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="reallyStartTime">
+		    AND  t.reallyStartTime <![CDATA[>=]]> #reallyStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="reallyEndTime">
+		    AND t.reallyStartTime <![CDATA[<=]]> #reallyEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="projectTransferStartTime">
+		    AND  t3.createTime <![CDATA[>=]]> #projectTransferStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="projectTransferEndTime">
+		    AND t3.createTime <![CDATA[<=]]> #projectTransferEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="intermediaryId">
+		    AND t7.id = #intermediaryId#
+		</isNotEmpty>
+		<isNotEmpty property="constructUtil">
+			AND t.constructUtil like '%$constructUtil$%'
+		</isNotEmpty>
+		)
+		AND t1.submitState = '1'
+		<isNotEmpty property="projectType">
+		   AND t1.projectType = #projectType#
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like '%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+	</select>
+
+	<!-- 获取跟踪项目基础信息 -->
+	<select id="getTractProjectAllByBiaoDuanInfo" parameterClass="com.audit.entity.project.ProejctBiaoDuanInfo"
+		resultClass="com.audit.entity.project.ProejctBiaoDuanInfo">
+		SELECT TOP $pagesize$ t1.id,t1.projectName,t2.ownerName,t1.projectType FROM dbo.pro_tractProjectAudit t1
+		LEFT JOIN dbo.sys_projectowner
+		t2
+		ON t1.ownerId = t2.id
+		WHERE t1.id in (SELECT distinct t.projectId FROM
+		dbo.pro_tractBiaoDuanCreate t
+		LEFT JOIN dbo.pro_tractProjectArrange t1
+		ON t.id = t1.biaoDuanId
+		LEFT JOIN dbo.pro_employeeArrangeRelate t2
+		ON t1.id = t2.projectArrangeId
+		LEFT JOIN dbo.pro_tractProjectTransferData t3
+		ON t3.tractProjectId = t.id
+		LEFT JOIN dbo.sys_intermediaryagency t7
+		ON t1.intermediaryId  = t7.id 
+		WHERE 1 = 1
+		<isEqual property="isArrange" compareValue="0">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="isArrange" compareValue="1">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="0">
+		    AND (t.dataTransferState is null OR t.dataTransferState = '0')
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="1">
+		    AND t.dataTransferState = '1'
+		</isEqual>
+		<isNotEmpty property="employeeAuditId">
+			<isEqual property="auditIdentity" compareValue="0">
+			    AND (t1.mainAuditId = #employeeAuditId# OR t2.governmentEmployeeId =
+				#employeeAuditId#)
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="1">
+			    AND t1.mainAuditId = #employeeAuditId# 
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="2">
+			    AND t2.governmentEmployeeId = #employeeAuditId#
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="reallyStartTime">
+		      AND t.reallyStartTime <![CDATA[>=]]> #reallyStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="reallyEndTime">
+		     AND t.reallyStartTime <![CDATA[<=]]> #reallyEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="projectTransferStartTime">
+		    AND  t3.createTime <![CDATA[>=]]> #projectTransferStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="projectTransferEndTime">
+		    AND t3.createTime <![CDATA[<=]]> #projectTransferEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="intermediaryId">
+		    AND t7.id = #intermediaryId#
+		</isNotEmpty>
+		<isNotEmpty property="constructUtil">
+			AND t.constructUtil like '%$constructUtil$%'
+		</isNotEmpty>
+		)
+		AND t1.submitState = '1'
+		<isNotEmpty property="projectType">
+		   AND t1.projectType = #projectType#
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like
+			'%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+		AND t1.id not in(
+		   SELECT TOP($pagesize$*($pageno$ - 1)) t1.id FROM dbo.pro_tractProjectAudit t1
+		LEFT JOIN dbo.sys_projectowner
+		t2
+		ON t1.ownerId = t2.id
+		WHERE t1.id in (SELECT distinct t.projectId FROM
+		dbo.pro_tractBiaoDuanCreate t
+			LEFT JOIN dbo.pro_tractProjectArrange t1
+		ON t.id = t1.biaoDuanId
+		LEFT JOIN dbo.pro_employeeArrangeRelate t2
+		ON t1.id = t2.projectArrangeId
+		LEFT JOIN dbo.sys_intermediaryagency t7
+		ON t1.intermediaryId  = t7.id 
+		WHERE 1 = 1
+		<isEqual property="isArrange" compareValue="0">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="isArrange" compareValue="1">
+			AND t.isArrange = #isArrange#
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="0">
+		    AND (t.dataTransferState is null OR t.dataTransferState = '0')
+		</isEqual>
+		<isEqual property="dataTransferState" compareValue="1">
+		    AND t.dataTransferState = '1'
+		</isEqual>
+		<isNotEmpty property="employeeAuditId">
+			<isEqual property="auditIdentity" compareValue="0">
+			    AND (t1.mainAuditId = #employeeAuditId# OR t2.governmentEmployeeId =
+				#employeeAuditId#)
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="1">
+			    AND t1.mainAuditId = #employeeAuditId# 
+			</isEqual>
+			<isEqual property="auditIdentity" compareValue="2">
+			    AND t2.governmentEmployeeId = #employeeAuditId#
+			</isEqual>
+		</isNotEmpty>
+		<isNotEmpty property="reallyStartTime">
+		     AND t.reallyStartTime <![CDATA[>=]]> #reallyStartTime#
+		</isNotEmpty>
+		<isNotEmpty property="reallyEndTime">
+		    AND t.reallyStartTime <![CDATA[<=]]> #reallyEndTime#
+		</isNotEmpty>
+		<isNotEmpty property="intermediaryId">
+		    AND t7.id = #intermediaryId#
+		</isNotEmpty>
+		)
+		AND t1.submitState = '1'
+		<isNotEmpty property="projectType">
+		   AND t1.projectType = #projectType#
+		</isNotEmpty>
+		<isNotEmpty property="projectName">
+			AND t1.projectName like '%$projectName$%'
+		</isNotEmpty>
+		<isNotEmpty property="ownerName">
+			AND t1.ownerId = #ownerName#
+		</isNotEmpty>
+		)
+	</select>
+
+	<select id="selectTractArrangeProjectInfo" parameterClass="java.lang.String"
+		resultClass="com.audit.entity.project.TractArrangeProjectInfo">
+		SELECT
+		t1.id
+		,t1.biaoDuanId
+		,t1.mainAuditId
+		,t1.intermediaryId
+		,t1.startTime
+		,t1.isPay
+		,t1.projectArrangeTime
+		,t1.projectCompleteTime
+		,t1.projectStartTime
+		,t1.projectEndTime
+		,t1.orderStartTime
+		,t1.arrangeUserAccount
+		,t1.updateTime
+		,t1.intermediaryLinker
+		,t1.intermediaryTelphone
+		,t1.intermediaryDutyName
+		,t1.intermediaryNames as intermediaryTeamName
+		,t2.username as mainAuditName
+		,t3.intermediaryname as intermediaryName
+		FROM dbo.pro_tractProjectArrange t1
+		LEFT JOIN dbo.sys_userinfo t2
+		ON t1.mainAuditId = t2.id
+		LEFT JOIN dbo.sys_intermediaryagency t3
+		ON t1.intermediaryId = t3.id
+		WHERE biaoDuanId = #biaoDuanId#
+	</select>
+	
+		<!-- 获取跟踪审计项目最大ID -->
+	<select id="getTractProjectArrangeMaxId" resultClass="java.lang.Integer">
+		SELECT
+		MAX(SUBSTRING
+		(id,3,len(id))) FROM dbo.pro_tractProjectArrange
+	</select>
+	
+	<insert id="insertTractProjectArrange" parameterClass="com.audit.entity.project.TractArrangeProjectInfo">
+	INSERT INTO dbo.pro_tractProjectArrange
+	(id
+	,biaoDuanId
+	,mainAuditId
+	,intermediaryId
+	<isNotEmpty property="startTime">
+	,startTime
+	</isNotEmpty>
+	,isPay
+	<isNotEmpty property="projectArrangeTime">
+	,projectArrangeTime
+	</isNotEmpty>
+	<isNotEmpty property="projectCompleteTime">
+	,projectCompleteTime
+	</isNotEmpty>
+	<isNotEmpty property="projectStartTime">
+	,projectStartTime
+	</isNotEmpty>
+	<isNotEmpty property="projectEndTime">
+	,projectEndTime
+	</isNotEmpty>
+	<isNotEmpty property="orderStartTime">
+	,orderStartTime
+	</isNotEmpty>
+	,arrangeUserAccount
+	,updateTime
+	,intermediaryDutyName
+	,intermediaryNames
+	,intermediaryTelphone
+	,intermediaryLinker)
+	VALUES
+	(#id#
+	,#biaoDuanId#
+	,#mainAuditId#
+	,#intermediaryId#
+	<isNotEmpty property="startTime">
+	,#startTime#
+	</isNotEmpty>
+	,#isPay#
+	<isNotEmpty property="projectArrangeTime">
+	,#projectArrangeTime#
+	</isNotEmpty>
+	<isNotEmpty property="projectCompleteTime">
+	,#projectCompleteTime#
+	</isNotEmpty>
+	<isNotEmpty property="projectStartTime">
+	,#projectStartTime#
+	</isNotEmpty>
+	<isNotEmpty property="projectEndTime">
+	,#projectEndTime#
+	</isNotEmpty>
+	<isNotEmpty property="orderStartTime">
+	,#orderStartTime#
+	</isNotEmpty>
+	,#arrangeUserAccount#
+	,#updateTime#
+	,#intermediaryDutyName#
+	,#intermediaryTeamName#
+	,#intermediaryTelphone#
+	,#intermediaryLinker#)
+	</insert>
+	
+	<!-- 更新标段信息 -->
+	<update id="updateBiaoDuanArrangeState" parameterClass="java.lang.String">
+		UPDATE
+		dbo.pro_tractBiaoDuanCreate
+		SET
+		isArrange = '1'
+		,updateTime = getdate()
+		WHERE id = #id#
+	</update>
+
+    <!-- 更新跟踪审计安排项目 -->
+	<update id="updateTractProjectArrange" parameterClass="com.audit.entity.project.TractArrangeProjectInfo">
+		UPDATE
+		dbo.pro_tractProjectArrange
+		SET
+		mainAuditId = #mainAuditId#
+		,startTime = #startTime#
+		,isPay = #isPay#
+		,projectArrangeTime = #projectArrangeTime#
+		,projectCompleteTime = #projectCompleteTime#
+		,projectStartTime = #projectStartTime#
+		,projectEndTime = #projectEndTime#
+		,orderStartTime = #orderStartTime#
+		,arrangeUserAccount = #arrangeUserAccount#
+		,intermediaryDutyName = #intermediaryDutyName#
+		,intermediaryNames = #intermediaryTeamName#
+		,intermediaryTelphone = #intermediaryTelphone#
+		,intermediaryLinker = #intermediaryLinker#
+		,intermediaryId=#intermediaryId#
+		,updateTime = getDate()
+		WHERE id = #id#
+	</update>
+</sqlMap>
